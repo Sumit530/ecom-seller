@@ -18,8 +18,8 @@ if (!container) {
   throw new Error("React root element doesn't exist!");
 }
 
+window.path = "http://localhost:4040/seller"
 const root = createRoot(container);
-
 root.render(
   <StrictMode>
     <Flowbite theme={{ theme }}>
