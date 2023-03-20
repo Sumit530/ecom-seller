@@ -1,8 +1,22 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { City,State,Country } from 'country-state-city';
+import Select from 'react-select';
 function App() {
   const formArray = [1, 2, 3, 4];
+    const country = Country.getAllCountries()
+    const stateopt = State.getAllStates().map((e)=>{
+      return ({label:e.name,value:e.isoCode})
+    })
+    
+    const cityopt = City.getAllCities().map((e)=>{
+      return ({label:e.name,value:e.isoCode})
+    })
+    
+    const countryOpt = country?.map((e)=>{
+      return ({label:e.name,value:e.isoCode})
+    })
   const [formNo, setFormNo] = useState(formArray[0])
   const [state, setState] = useState({
     name: '',
@@ -54,7 +68,10 @@ function App() {
           setFormNo(formNo + 1)
         }
         else if(formNo==3){
-          
+          setFormNo(formNo + 1)
+        }
+        else if(formNo == 4){
+
         }
   
   }
@@ -255,13 +272,19 @@ function App() {
               <input value={state.thana} onChange={inputHandle} className='p-2 border border-slate-400 mt-1 outline-0 focus:border-blue-500 rounded-md' type="text" name='area' placeholder='thana' id='thana' />
             </div>
             <div className='flex flex-col mb-2'>
-              <label htmlFor="post">city</label>
-              <input value={state.post} onChange={inputHandle} className='p-2 border border-slate-400 mt-1 outline-0 focus:border-blue-500 rounded-md' type="text" name='city' placeholder='post' id='post' />
+              <label htmlFor="post">Country</label>
+              <Select value={state.post}  options={countryOpt} className='p-2  mt-1 outline-0 focus:border-blue-500 rounded-md' type="text" name='state' placeholder='post' id='post' />
             </div>
             <div className='flex flex-col mb-2'>
               <label htmlFor="post">State</label>
-              <input value={state.post} onChange={inputHandle} className='p-2 border border-slate-400 mt-1 outline-0 focus:border-blue-500 rounded-md' type="text" name='state' placeholder='post' id='post' />
+              <Select value={state.post}  options={stateopt} className='p-2  mt-1 outline-0 focus:border-blue-500 rounded-md' type="text" name='state' placeholder='post' id='post' />
             </div>
+            <div className='flex flex-col mb-2'>
+              <label htmlFor="post">City</label>
+              <Select value={state.post}  options={cityopt} className='p-2  mt-1 outline-0 focus:border-blue-500 rounded-md' type="text" name='state' placeholder='post' id='post' />
+            </div>
+          
+          
             <div className="flex items-center justify-end mt-4">
             
               <div className='mt-4 gap-3 flex justify-center items-center'>

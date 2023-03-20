@@ -9,7 +9,8 @@ import {
   Textarea,
   TextInput,
 } from "flowbite-react";
-import type { FC } from "react";
+import Select from 'react-select'
+import { FC, useEffect } from "react";
 import { useState } from "react";
 import { FaPlus } from "react-icons/fa";
 import {
@@ -118,16 +119,31 @@ const SearchForProducts: FC = function () {
 
 const AddProductModal: FC = function () {
   const [isOpen, setOpen] = useState(false);
+  const [data,setData] = useState({
+    name:"",
+    category:"",
+    sub_category:"",
+    brand : "",
+    price :"",
+    discounted_price : "",
+    description:"",
+    product:[]
 
+
+  })
+  const handleinputs = (e)=>{
+    setData({...data,[e.target.name]:e.target.value})
+  }
+  useEffect(()=>{},[])
   return (
     <>
       <Button color="primary" onClick={() => setOpen(!isOpen)}>
-        <FaPlus className="mr-3 text-sm" />
-        Add product
+        <FaPlus className="mr-2 text-lg" />
+       Add Product
       </Button>
       <Modal onClose={() => setOpen(false)} show={isOpen}>
         <Modal.Header className="border-b border-gray-200 !p-6 dark:border-gray-700">
-          <strong>Add product</strong>
+          <strong>Add Product</strong>
         </Modal.Header>
         <Modal.Body>
           <form>
@@ -136,16 +152,33 @@ const AddProductModal: FC = function () {
                 <Label htmlFor="productName">Product name</Label>
                 <TextInput
                   id="productName"
-                  name="productName"
+                  name="name"
+                  onChange={handleinputs}
+                  value={data.name}
                   placeholder='Apple iMac 27"'
                   className="mt-1"
                 />
               </div>
               <div>
                 <Label htmlFor="category">Category</Label>
-                <TextInput
+                <Select
                   id="category"
                   name="category"
+                   onChange = {(e)=>setData({...data,category:e})}
+                  value={data.category}
+                  options={[{label:"Footware", value:1},{label:"Footware", value:"Footware"}]}
+                  placeholder="Electronics"
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <Label htmlFor="category">Sub Category</Label>
+                <Select
+                  id="category"
+                  name="sub_category"
+                  onChange = {(e)=>setData({...data,sub_category:e})}
+                  value={data.sub_category}
+                  options={[{label:"Footwear", value:"Footwear"},{label:"TopWear", value:"TopWear"}]}
                   placeholder="Electronics"
                   className="mt-1"
                 />
@@ -155,6 +188,8 @@ const AddProductModal: FC = function () {
                 <TextInput
                   id="brand"
                   name="brand"
+                  onChange = {handleinputs}
+                  value={data.brand}
                   placeholder="Apple"
                   className="mt-1"
                 />
@@ -164,20 +199,59 @@ const AddProductModal: FC = function () {
                 <TextInput
                   id="price"
                   name="price"
+                  onChange = {handleinputs}
+                  value={data.price}
                   type="number"
                   placeholder="$2300"
                   className="mt-1"
                 />
               </div>
               <div className="lg:col-span-2">
-                <Label htmlFor="producTable.Celletails">Product details</Label>
+                <Label htmlFor="productDetails">Product details</Label>
                 <Textarea
-                  id="producTable.Celletails"
-                  name="producTable.Celletails"
+                  id="productDetails"
+                  name="description"
+                  onChange = {handleinputs}
+                  value={data.description}
                   placeholder="e.g. 3.8GHz 8-core 10th-generation Intel Core i7 processor, Turbo Boost up to 5.0GHz, Ram 16 GB DDR4 2300Mhz"
                   rows={6}
                   className="mt-1"
                 />
+              </div>
+              <div className="flex space-x-5">
+                <div>
+                  <img
+                    alt="Apple iMac 1"
+                    src="/images/products/apple-imac-1.png"
+                    className="h-24"
+                  />
+                  <a href="#" className="cursor-pointer">
+                    <span className="sr-only">Delete</span>
+                    <HiTrash className="-mt-5 text-2xl text-red-600" />
+                  </a>
+                </div>
+                <div>
+                  <img
+                    alt="Apple iMac 2"
+                    src="/images/products/apple-imac-2.png"
+                    className="h-24"
+                  />
+                  <a href="#" className="cursor-pointer">
+                    <span className="sr-only">Delete</span>
+                    <HiTrash className="-mt-5 text-2xl text-red-600" />
+                  </a>
+                </div>
+                <div>
+                  <img
+                    alt="Apple iMac 3"
+                    src="/images/products/apple-imac-3.png"
+                    className="h-24"
+                  />
+                  <a href="#" className="cursor-pointer">
+                    <span className="sr-only">Delete</span>
+                    <HiTrash className="-mt-5 text-2xl text-red-600" />
+                  </a>
+                </div>
               </div>
               <div className="lg:col-span-2">
                 <div className="flex w-full items-center justify-center">
@@ -191,7 +265,7 @@ const AddProductModal: FC = function () {
                         PNG, JPG, GIF up to 10MB
                       </p>
                     </div>
-                    <input type="file" className="hidden" />
+                    <input type="file" className="hidden" multiple />
                   </label>
                 </div>
               </div>
@@ -200,7 +274,7 @@ const AddProductModal: FC = function () {
         </Modal.Body>
         <Modal.Footer>
           <Button color="primary" onClick={() => setOpen(false)}>
-            Add product
+            Save all
           </Button>
         </Modal.Footer>
       </Modal>
@@ -210,7 +284,22 @@ const AddProductModal: FC = function () {
 
 const EditProductModal: FC = function () {
   const [isOpen, setOpen] = useState(false);
+  const [data,setData] = useState({
+    name:"",
+    category:"",
+    sub_category:"",
+    brand : "",
+    price :"",
+    discounted_price : "",
+    description:"",
+    product:[]
 
+
+  })
+  const handleinputs = (e)=>{
+    setData({...data,[e.target.name]:e.target.value})
+  }
+  useEffect(()=>{},[])
   return (
     <>
       <Button color="primary" onClick={() => setOpen(!isOpen)}>
@@ -228,7 +317,9 @@ const EditProductModal: FC = function () {
                 <Label htmlFor="productName">Product name</Label>
                 <TextInput
                   id="productName"
-                  name="productName"
+                  name="name"
+                  onChange={handleinputs}
+                  value={data.name}
                   placeholder='Apple iMac 27"'
                   className="mt-1"
                 />
@@ -238,6 +329,8 @@ const EditProductModal: FC = function () {
                 <TextInput
                   id="category"
                   name="category"
+                  onChange = {handleinputs}
+                  value={data.category}
                   placeholder="Electronics"
                   className="mt-1"
                 />
@@ -247,6 +340,8 @@ const EditProductModal: FC = function () {
                 <TextInput
                   id="brand"
                   name="brand"
+                  onChange = {handleinputs}
+                  value={data.brand}
                   placeholder="Apple"
                   className="mt-1"
                 />
@@ -256,6 +351,8 @@ const EditProductModal: FC = function () {
                 <TextInput
                   id="price"
                   name="price"
+                  onChange = {handleinputs}
+                  value={data.price}
                   type="number"
                   placeholder="$2300"
                   className="mt-1"
@@ -265,7 +362,9 @@ const EditProductModal: FC = function () {
                 <Label htmlFor="productDetails">Product details</Label>
                 <Textarea
                   id="productDetails"
-                  name="productDetails"
+                  name="description"
+                  onChange = {handleinputs}
+                  value={data.description}
                   placeholder="e.g. 3.8GHz 8-core 10th-generation Intel Core i7 processor, Turbo Boost up to 5.0GHz, Ram 16 GB DDR4 2300Mhz"
                   rows={6}
                   className="mt-1"
