@@ -134,7 +134,23 @@ const AddProductModal: FC = function () {
   const handleinputs = (e)=>{
     setData({...data,[e.target.name]:e.target.value})
   }
-  useEffect(()=>{},[])
+  const [category,setcategory] = useState(null)
+  const getCat = async() =>{
+    const fetchcat = await fetch(`${window.path}/getcategory`,{
+      method:"get"
+    })
+    const cat = await fetchcat.json()
+    if(cat.status ==1 ){
+        const cate = cat.result?.map((e)=>{
+          return({label:e.name,value:e._id})
+        })
+      setcategory(cate)
+    }
+  }
+  useEffect(()=>{
+    getCat()
+  },[])
+  
   return (
     <>
       <Button color="primary" onClick={() => setOpen(!isOpen)}>
@@ -161,15 +177,19 @@ const AddProductModal: FC = function () {
               </div>
               <div>
                 <Label htmlFor="category">Category</Label>
-                <Select
+                {
+                  category != null ?
+
+                  <Select
                   id="category"
                   name="category"
-                   onChange = {(e)=>setData({...data,category:e})}
+                  onChange = {(e)=>setData({...data,category:e})}
                   value={data.category}
-                  options={[{label:"Footware", value:1},{label:"Footware", value:"Footware"}]}
+                  options={category}
                   placeholder="Electronics"
                   className="mt-1"
-                />
+                  />
+                :""}
               </div>
               <div>
                 <Label htmlFor="category">Sub Category</Label>
