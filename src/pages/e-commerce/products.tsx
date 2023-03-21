@@ -119,6 +119,7 @@ const SearchForProducts: FC = function () {
 
 const AddProductModal: FC = function () {
   const [isOpen, setOpen] = useState(false);
+
   const [data,setData] = useState({
     name:"",
     category:"",
@@ -135,6 +136,7 @@ const AddProductModal: FC = function () {
     setData({...data,[e.target.name]:e.target.value})
   }
   const [category,setcategory] = useState(null)
+  const [subcategory,setSubcategory] = useState(category != null && category[0])
   const getCat = async() =>{
     const fetchcat = await fetch(`${window.path}/getcategory`,{
       method:"get"
@@ -145,6 +147,18 @@ const AddProductModal: FC = function () {
           return({label:e.name,value:e._id})
         })
       setcategory(cate)
+    }
+  }
+  const getSubCat = async() =>{
+    const fetchcat = await fetch(`${window.path}/getcategory/${subcategory.value}`,{
+      method:"get"
+    })
+    const cat = await fetchcat.json()
+    if(cat.status ==1 ){
+        const cate = cat.result?.map((e)=>{
+          return({label:e.name,value:e._id})
+        })
+      setSubcategory(cate)
     }
   }
   useEffect(()=>{
@@ -184,6 +198,7 @@ const AddProductModal: FC = function () {
                   id="category"
                   name="category"
                   onChange = {(e)=>setData({...data,category:e})}
+                  defaultInputValue={category[0]}
                   value={data.category}
                   options={category}
                   placeholder="Electronics"
@@ -218,6 +233,18 @@ const AddProductModal: FC = function () {
                 <Label htmlFor="price">Price</Label>
                 <TextInput
                   id="price"
+                  name="price"
+                  onChange = {handleinputs}
+                  value={data.price}
+                  type="number"
+                  placeholder="$2300"
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <Label htmlFor="Discountprice">Discounted Price</Label>
+                <TextInput
+                  id="Discountprice"
                   name="price"
                   onChange = {handleinputs}
                   value={data.price}

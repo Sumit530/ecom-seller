@@ -3,6 +3,7 @@ import { Button, Card, Checkbox, Label, TextInput } from "flowbite-react";
 import type { FC } from "react";
 
 const SignInPage: FC = function () {
+  // const []
   return (
     <div className="flex flex-col items-center justify-center px-6 lg:h-screen lg:w-screen lg:gap-y-12">
       <div className="my-6 flex items-center gap-x-1 lg:my-0">
