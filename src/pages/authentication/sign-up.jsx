@@ -17,7 +17,7 @@ function App() {
     const countryOpt = country?.map((e)=>{
       return ({label:e.name,value:e.isoCode})
     })
-  const [formNo, setFormNo] = useState(formArray[0])
+  const [formNo, setFormNo] = useState(localStorage.getItem("signupform"))
   const [state, setState] = useState({
     name: '',
     email: '',
@@ -44,34 +44,92 @@ function App() {
       [e.target.name]: e.target.value
     })
   }
-  const next = () => {
-    console.log(state)
-    console.log(window.path)
+  const next = async() => {
         if(formNo==1 ){
-          if(state.name != "" && state.email != "" && state.bussiness_name != "" && state.password != "" && state.password == state.cpassword){
-
+          localStorage.setItem("signupform",1)
+          if(state.name != ""){
+            toast.error('Please Fill Name',{
+              autoClose:600,
+              progress:false,
+              position:"top-center"
+            })
+            return
+          }
+          const validateEmail = (email) => {
+            return email.match(
+              /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+            );
+          };
+          if(validateEmail(state.email)){
+        
+          }
+          else{
+              toast.error("please fill Email Properly",{
+                  autoClose:200,
+                  progress:false,
+                  theme:"light",
+              })
+              return
+          }
+          if(state.bussiness_name.length == 0 && /\d/.test(state.bussiness_name)){
+            toast.error("please fill Bussiness Properly",{
+              autoClose:200,
+              progress:false,
+              theme:"light",
+          })
+          return
+          }
+          if(state.password.length <8){
+            toast.error("Password Length Must be 8 character",{
+                autoClose:200,
+                progress:false,
+                theme:"light",
+            })
+            return
+        } 
+        if(state.cpassword.length <8){
+            toast.error("confirm Password Length Must be 8 character",{
+                autoClose:200,
+                progress:false,
+                theme:"light",
+            })
+            return  
+        }
+        if(state.password != state.cpassword  ){
+            toast.error("Password are not matching",{
+                autoClose:200,
+                progress:false,
+                theme:"light",
+            })
+            return
+        }
             const formdata = new FormData()
             formdata.append("name",state.name)
             formdata.append("email",state.email)
             formdata.append("bussiness_name",state.bussiness_name)
             formdata.append("password",state.password)
-            fetch(`${window.path}/register`,{
+            const fetchdata = await  fetch(`${window.path}/register`,{
               method:"post",
               body:formdata
             })
-            setFormNo(formNo + 1)
-          }else{
-            toast.error('Please fillup all input field')
-          }
+            const resp = await fetchdata.json()
+            if(resp.status == 1){
+
+              setFormNo(formNo + 1)
+            }
+            
         }
         else if (formNo == 2){
           setFormNo(formNo + 1)
+          localStorage.setItem("signupform",2)
         }
         else if(formNo==3){
           setFormNo(formNo + 1)
+          localStorage.setItem("signupform",3)
         }
         else if(formNo == 4){
-
+          localStorage.setItem("signupform",4)
+          
         }
   
   }

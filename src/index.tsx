@@ -20,6 +20,12 @@ if (!container) {
 
 window.path = "http://localhost:4040/seller"
 const root = createRoot(container);
+if(!localStorage.getItem("adminauth")){
+  if(!localStorage.getItem("signupform")){
+
+    localStorage.setItem("signupform",1)
+  }
+}
 root.render(
   <StrictMode>
     <Flowbite theme={{ theme }}>

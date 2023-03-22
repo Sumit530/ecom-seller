@@ -119,7 +119,8 @@ const SearchForProducts: FC = function () {
 
 const AddProductModal: FC = function () {
   const [isOpen, setOpen] = useState(false);
-
+const [productImage,setproductImage] = useState([{}])
+const [productImageURL,setproductImageURL] = useState([])
   const [data,setData] = useState({
     name:"",
     category:"",
@@ -128,7 +129,7 @@ const AddProductModal: FC = function () {
     price :"",
     discounted_price : "",
     description:"",
-    product:[]
+   
 
 
   })
@@ -150,21 +151,40 @@ const AddProductModal: FC = function () {
     }
   }
   const getSubCat = async() =>{
-    const fetchcat = await fetch(`${window.path}/getcategory/${subcategory.value}`,{
+    const fetchcat = await fetch(`${window.path}/getsubcategory/${data?.category?.value ? data?.category?.value : category.length>0 && category[0]._id}`,{
       method:"get"
     })
     const cat = await fetchcat.json()
+    console.log(cat)
     if(cat.status ==1 ){
         const cate = cat.result?.map((e)=>{
           return({label:e.name,value:e._id})
         })
+        console.log(cate)
       setSubcategory(cate)
+    }else{
+      setSubcategory("")
+      setData({...data,sub_category:""})
     }
   }
   useEffect(()=>{
     getCat()
   },[])
+  useEffect(()=>{
+    getSubCat()
+  },[data.category])
   
+  const addProduct = async(e) =>{
+    e.preventDefault()
+    const formdata = new FormData()
+    formdata.append("name",data.name)
+    formdata.append("description",data.description)
+    formdata.append("price",data.price)
+    formdata.append("discounted_price",data.discounted_price)
+    formdata.append("brand",data.brand)
+    formdata.append("category",data.category.value)
+    formdata.append("sub_category",data.sub_category.value)
+  }
   return (
     <>
       <Button color="primary" onClick={() => setOpen(!isOpen)}>
@@ -197,7 +217,7 @@ const AddProductModal: FC = function () {
                   <Select
                   id="category"
                   name="category"
-                  onChange = {(e)=>setData({...data,category:e})}
+                  onChange = {(e)=>{setData({...data,category:e});}}
                   defaultInputValue={category[0]}
                   value={data.category}
                   options={category}
@@ -208,15 +228,18 @@ const AddProductModal: FC = function () {
               </div>
               <div>
                 <Label htmlFor="category">Sub Category</Label>
-                <Select
+                {
+                    subcategory != null &&
+                  <Select
                   id="category"
                   name="sub_category"
                   onChange = {(e)=>setData({...data,sub_category:e})}
                   value={data.sub_category}
-                  options={[{label:"Footwear", value:"Footwear"},{label:"TopWear", value:"TopWear"}]}
+                  options={subcategory}
                   placeholder="Electronics"
                   className="mt-1"
-                />
+                  />
+                }
               </div>
               <div>
                 <Label htmlFor="brand">Brand</Label>
@@ -230,14 +253,14 @@ const AddProductModal: FC = function () {
                 />
               </div>
               <div>
-                <Label htmlFor="price">Price</Label>
+                <Label htmlFor="price">Original Price</Label>
                 <TextInput
                   id="price"
                   name="price"
                   onChange = {handleinputs}
                   value={data.price}
                   type="number"
-                  placeholder="$2300"
+                  placeholder="2300"
                   className="mt-1"
                 />
               </div>
@@ -245,11 +268,11 @@ const AddProductModal: FC = function () {
                 <Label htmlFor="Discountprice">Discounted Price</Label>
                 <TextInput
                   id="Discountprice"
-                  name="price"
+                  name="discounted_price"
                   onChange = {handleinputs}
-                  value={data.price}
+                  value={data.discounted_price}
                   type="number"
-                  placeholder="$2300"
+                  placeholder="15555"
                   className="mt-1"
                 />
               </div>
@@ -265,44 +288,35 @@ const AddProductModal: FC = function () {
                   className="mt-1"
                 />
               </div>
-              <div className="flex space-x-5">
-                <div>
+              <div className="flex space-x-5 ">
+                {
+                  productImageURL.map((e)=>(
+
+                    <div>
                   <img
                     alt="Apple iMac 1"
-                    src="/images/products/apple-imac-1.png"
+                    src={e}
                     className="h-24"
-                  />
+                    />
                   <a href="#" className="cursor-pointer">
                     <span className="sr-only">Delete</span>
-                    <HiTrash className="-mt-5 text-2xl text-red-600" />
+                    <HiTrash className="-mt-5 text-2xl text-red-600" onClick={async()=>{
+                      setproductImageURL(productImageURL.filter(f=> f != e ))
+                      
+                    }} />
                   </a>
                 </div>
-                <div>
-                  <img
-                    alt="Apple iMac 2"
-                    src="/images/products/apple-imac-2.png"
-                    className="h-24"
-                  />
-                  <a href="#" className="cursor-pointer">
-                    <span className="sr-only">Delete</span>
-                    <HiTrash className="-mt-5 text-2xl text-red-600" />
-                  </a>
-                </div>
-                <div>
-                  <img
-                    alt="Apple iMac 3"
-                    src="/images/products/apple-imac-3.png"
-                    className="h-24"
-                  />
-                  <a href="#" className="cursor-pointer">
-                    <span className="sr-only">Delete</span>
-                    <HiTrash className="-mt-5 text-2xl text-red-600" />
-                  </a>
-                </div>
+                    ))
+                  }
+               
               </div>
               <div className="lg:col-span-2">
                 <div className="flex w-full items-center justify-center">
-                  <label className="flex h-32 w-full cursor-pointer flex-col rounded border-2 border-dashed border-gray-300 hover:bg-gray-50 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-700">
+                  <label className="flex h-32 w-full cursor-pointer flex-col rounded border-2 border-dashed border-gray-300 hover:bg-gray-50 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-700" onChange={(e)=>{
+                    if(productImageURL.length<3){
+                      setproductImageURL([...productImageURL,URL.createObjectURL(e.target.files[0])])
+                    }
+                  }}>
                     <div className="flex flex-col items-center justify-center pt-5 pb-6">
                       <HiUpload className="text-4xl text-gray-300" />
                       <p className="py-1 text-sm text-gray-600 dark:text-gray-500">
@@ -320,8 +334,8 @@ const AddProductModal: FC = function () {
           </form>
         </Modal.Body>
         <Modal.Footer>
-          <Button color="primary" onClick={() => setOpen(false)}>
-            Save all
+          <Button color="primary" onClick={addProduct}>
+            Add Product
           </Button>
         </Modal.Footer>
       </Modal>
