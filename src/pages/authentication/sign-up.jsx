@@ -1,31 +1,42 @@
 import React, { useEffect, useState } from 'react';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { useNavigate } from 'react-router-dom';
 import { City,State,Country } from 'country-state-city';
 import Select from 'react-select';
 function App() {
   const formArray = [1, 2, 3, 4];
-    const country = Country.getAllCountries()
-    const stateopt = State.getAllStates().map((e)=>{
-      return ({label:e.name,value:e.isoCode})
-    })
-    
-    const cityopt = City.getAllCities().map((e)=>{
-      return ({label:e.name,value:e.isoCode})
-    })
-    
-    const countryOpt = country?.map((e)=>{
-      return ({label:e.name,value:e.isoCode})
-    })
-  const [formNo, setFormNo] = useState(localStorage.getItem("signupform"))
+  const navigate = useNavigate()
   const [state, setState] = useState({
     name: '',
     email: '',
     bussiness_name: '',
     password: '',
     cpassword: '',
+    pan:'',
+    adhar:'',
+    gstn:'',
+    houseno:'',
+    area:'',
+    country:{label:"india",value:"IN"},
+    state:'',
+    city:'',
+
 
   })
+    const country = Country.getAllCountries()
+    const stateopt = State.getStatesOfCountry(state.country.value).map((e)=>{
+      return ({label:e.name,value:e.isoCode})
+    })
+    const cityopt = City.getCitiesOfCountry(state.country.value).map((e)=>{
+      return ({label:e.name,value:e.isoCode})
+    })
+    const countryOpt = country?.map((e)=>{
+     
+      return ({label:e.name,value:e.isoCode})
+    })
+  const [formNo, setFormNo] = useState(localStorage.getItem("signupform"))
+ 
   const [otp,setotp] = useState({
     first:"",
     second:"",
@@ -35,7 +46,6 @@ function App() {
     sixth:"",
   })
   const otphandle = (e) =>{
-    if(!isNaN(parseInt(e.target.value)))
     setotp({...otp,[e.target.name]:e.target.value})
   }
   const inputHandle = (e) => {
@@ -44,10 +54,12 @@ function App() {
       [e.target.name]: e.target.value
     })
   }
+
   const next = async() => {
+
         if(formNo==1 ){
           localStorage.setItem("signupform",1)
-          if(state.name != ""){
+          if(state.name == ""){
             toast.error('Please Fill Name',{
               autoClose:600,
               progress:false,
@@ -103,33 +115,146 @@ function App() {
             })
             return
         }
-            const formdata = new FormData()
+        setFormNo(parseInt(formNo) + 1)
+            
+            
+        }
+        else if (formNo == 2){
+          localStorage.setItem("signupform",2)
+          if(state.gstn.length == 0){
+            toast.error("Please fill House Address",{
+                autoClose:200,
+                progress:false,
+                theme:"light",
+            })
+            return
+        } 
+        if(state.pan.length == 0){
+          toast.error("Please fill Area",{
+              autoClose:200,
+              progress:false,
+              theme:"light",
+          })
+          return
+      } 
+      if(state.adhar.length == 0){
+        toast.error("Please fill House Address",{
+            autoClose:200,
+            progress:false,
+            theme:"light",
+        })
+        return
+    } 
+          setFormNo( parseInt(formNo) + 1)
+        }
+        else if(formNo==3){
+          localStorage.setItem("signupform",3)
+        
+          if(state.houseno.length == 0){
+            toast.error("Please fill House Address",{
+                autoClose:200,
+                progress:false,
+                theme:"light",
+            })
+            return
+        } 
+        if(state.area.length == 0){
+          toast.error("Please fill Area",{
+              autoClose:200,
+              progress:false,
+              theme:"light",
+          })
+          return
+      } 
+      if(state.state.length == 0){
+        toast.error("Please fill House Address",{
+            autoClose:200,
+            progress:false,
+            theme:"light",
+        })
+        return
+    } 
+    if(state.country.length == 0){
+      toast.error("Please fill Area",{
+          autoClose:200,
+          progress:false,
+          theme:"light",
+      })
+      return
+  } 
+  if(state.city.length == 0){
+    toast.error("Please fill Area",{
+        autoClose:200,
+        progress:false,
+        theme:"light",
+    })
+    return
+} 
+          const formdata = new FormData()
             formdata.append("name",state.name)
             formdata.append("email",state.email)
             formdata.append("bussiness_name",state.bussiness_name)
             formdata.append("password",state.password)
+            formdata.append("gstn",state.gstn)
+            formdata.append("adhar",state.adhar)
+            formdata.append("pan",state.pan)
+            formdata.append("houseno",state.houseno)
+            formdata.append("area",state.area)
+            formdata.append("state",state.state.label)
+            formdata.append("country",state.country.label)
+            formdata.append("city",state.city.label)
             const fetchdata = await  fetch(`${window.path}/register`,{
               method:"post",
               body:formdata
             })
             const resp = await fetchdata.json()
+            console.log(resp)
             if(resp.status == 1){
 
               setFormNo(formNo + 1)
+
             }
-            
-        }
-        else if (formNo == 2){
-          
-          setFormNo(formNo + 1)
-          localStorage.setItem("signupform",2)
-        }
-        else if(formNo==3){
-          setFormNo(formNo + 1)
-          localStorage.setItem("signupform",3)
         }
         else if(formNo == 4){
           localStorage.setItem("signupform",4)
+          if(
+            otp.first.length == 0 ||
+            otp.second.length == 0||
+            otp.third.length == 0 ||
+            otp.fourth.length == 0||
+            otp.fifth.length == 0 ||
+            otp.sixth.length == 0 
+             ){
+               toast.error("Enter Otp!",{
+                 autoClose:200,
+                 progress:false,
+                 theme:"light",
+             })
+             return
+             }
+             const formdata = new FormData()
+          formdata.append("otp",otp.first +  otp.second + otp.third  + otp.fourth + otp.fifth  + otp.sixth )
+          formdata.append("email",state.email)
+          const fetchdata = await  fetch(`${window.path}/confirmotp`,{
+            method:"post",
+            body:formdata
+          })
+          const resp = await fetchdata.json()
+          console.log(resp)
+         
+          if(resp.status == 1){
+
+            setFormNo(formNo + 1)
+            localStorage.setItem("signupform",4)
+            navigate("/authentication/sign-in")
+          }
+          else if(resp.status == -1) {
+            toast.error("Please fill House Address",{
+              autoClose:200,
+              progress:false,
+              theme:"light",
+          })
+          }
           
         }
   
@@ -163,7 +288,7 @@ function App() {
           }
         </div>
         {
-          formNo === 1 && 
+          formNo == 1 && 
         <>
         
           <div>
@@ -260,8 +385,68 @@ function App() {
           </div>
     </>
         }
+       
+
         {
-             formNo === 2 &&  
+          formNo == 2 && <div>
+            <div className='flex flex-col mb-2'>
+              <label className='text-slate-500' htmlFor="varsity">GSTN</label>
+              <input value={state.gstn} name="gstn" onChange={inputHandle}   className='p-2 border border-slate-400 mt-1 outline-0 text-slate-500 focus:border-blue-500 rounded-md' type="text"  placeholder='varsity name' id='varsity' />
+            </div>
+            
+            <div className='flex flex-col mb-2'>
+              <label className='text-slate-500' htmlFor="session">PAN No.</label>
+              <input value={state.pan} name="pan" onChange={inputHandle}   className='p-2 border border-slate-400 mt-1 outline-0 text-slate-500 focus:border-blue-500 rounded-md' type="text"  placeholder='session' id='session' />
+            </div>
+            <div className='flex flex-col mb-2'>
+              <label className='text-slate-500' htmlFor="address">Adhar No.</label>
+              <input value={state.adhar} name="adhar" onChange={inputHandle}   row='10' className='p-2 border border-slate-400 mt-1 outline-0 text-slate-500 focus:border-blue-500 rounded-md' type="number"  placeholder='address' ></input>
+            </div>
+            <div className="flex items-center justify-end mt-4">
+            
+              <div className='mt-4 gap-3 flex justify-center items-center'>
+              <button onClick={pre} className='px-3 py-2 text-lg rounded-md w-full text-white bg-blue-500'>Previous</button>
+              <button onClick={next} className='px-3 py-2 text-lg rounded-md w-full text-white bg-blue-500'>Next</button>
+            </div>
+          </div>
+          </div>
+        }
+
+        {
+          formNo == 3 && <div>
+            <div className='flex flex-col mb-2'>
+              <label htmlFor="district">House No.</label>
+              <input value={state.houseno} onChange={inputHandle} className='p-2 border border-slate-400 mt-1 outline-0 focus:border-blue-500 rounded-md' type="text" name='houseno' placeholder='district name' id='district' />
+            </div>
+            <div className='flex flex-col mb-2'>
+              <label htmlFor="thana">Area </label>
+              <input value={state.area} onChange={inputHandle} className='p-2 border border-slate-400 mt-1 outline-0 focus:border-blue-500 rounded-md' type="text" name='area' placeholder='Area' id='thana' />
+            </div>
+            <div className='flex flex-col mb-2'>
+              <label htmlFor="post">Country</label>
+              <Select value={state.country}  options={countryOpt} onChange={(e)=>{setState({...state,country:e})}} className='p-2  mt-1 outline-0 focus:border-blue-500 rounded-md' type="text" name='state' placeholder='country' id='post' />
+            </div>
+            <div className='flex flex-col mb-2'>
+              <label htmlFor="post">State</label>
+              <Select value={state.state}  options={stateopt} onChange={(e)=>{setState({...state,state:e})}} className='p-2  mt-1 outline-0 focus:border-blue-500 rounded-md' type="text" name='state' placeholder='state' id='post' />
+            </div>
+            <div className='flex flex-col mb-2'>
+              <label htmlFor="post">City</label>
+              <Select value={state.city}  options={cityopt} onChange={(e)=>{setState({...state,city:e})}} className='p-2  mt-1 outline-0 focus:border-blue-500 rounded-md' type="text" name='state' placeholder='city' id='post' />
+            </div>
+          
+          
+            <div className="flex items-center justify-end mt-4">
+            
+              <div className='mt-4 gap-3 flex justify-center items-center'>
+              <button onClick={pre} className='px-3 py-2 text-lg rounded-md w-full text-white bg-blue-500'>Previous</button>
+              <button onClick={next} className='px-3 py-2 text-lg rounded-md w-full text-white bg-blue-500'>Next</button>
+            </div>
+          </div>
+          </div>
+        }
+ {
+             formNo == 4 &&  
              <div>
 
              
@@ -269,7 +454,7 @@ function App() {
              <h1 class="text-2xl font-bold">OTP Verification</h1>
              <div class="flex flex-col mt-4">
                  <span>Enter the OTP you received at</span>
-                 <span class="font-bold">+91 ******876</span>
+                 <span class="font-bold">{state?.email.length > 0 ? state.email.slice(0,1) + "*****"+ state.email.slice(state.email.length - 4 , state.email.length ) :""}</span>
              </div>
              
              <div id="otp" class="flex flex-row justify-center text-center px-2 mt-5">
@@ -294,66 +479,6 @@ function App() {
        </div>
        </div>
         }
-
-        {
-          formNo === 3 && <div>
-            <div className='flex flex-col mb-2'>
-              <label className='text-slate-500' htmlFor="varsity">GSTN</label>
-              <input value={state.varsity} onChange={inputHandle} className='p-2 border border-slate-400 mt-1 outline-0 text-slate-500 focus:border-blue-500 rounded-md' type="text" name='varsity' placeholder='varsity name' id='varsity' />
-            </div>
-            
-            <div className='flex flex-col mb-2'>
-              <label className='text-slate-500' htmlFor="session">PAN No.</label>
-              <input value={state.session} onChange={inputHandle} className='p-2 border border-slate-400 mt-1 outline-0 text-slate-500 focus:border-blue-500 rounded-md' type="text" name='session' placeholder='session' id='session' />
-            </div>
-            <div className='flex flex-col mb-2'>
-              <label className='text-slate-500' htmlFor="address">PAN No.</label>
-              <textarea value={state.address} onChange={inputHandle} row='10' className='p-2 border border-slate-400 mt-1 outline-0 text-slate-500 focus:border-blue-500 rounded-md' type="number" name='address' placeholder='address' ></textarea>
-            </div>
-            <div className="flex items-center justify-end mt-4">
-            
-              <div className='mt-4 gap-3 flex justify-center items-center'>
-              <button onClick={pre} className='px-3 py-2 text-lg rounded-md w-full text-white bg-blue-500'>Previous</button>
-              <button onClick={next} className='px-3 py-2 text-lg rounded-md w-full text-white bg-blue-500'>Next</button>
-            </div>
-          </div>
-          </div>
-        }
-
-        {
-          formNo === 4 && <div>
-            <div className='flex flex-col mb-2'>
-              <label htmlFor="district">House No.</label>
-              <input value={state.district} onChange={inputHandle} className='p-2 border border-slate-400 mt-1 outline-0 focus:border-blue-500 rounded-md' type="text" name='house' placeholder='district name' id='district' />
-            </div>
-            <div className='flex flex-col mb-2'>
-              <label htmlFor="thana">Area </label>
-              <input value={state.thana} onChange={inputHandle} className='p-2 border border-slate-400 mt-1 outline-0 focus:border-blue-500 rounded-md' type="text" name='area' placeholder='thana' id='thana' />
-            </div>
-            <div className='flex flex-col mb-2'>
-              <label htmlFor="post">Country</label>
-              <Select value={state.post}  options={countryOpt} className='p-2  mt-1 outline-0 focus:border-blue-500 rounded-md' type="text" name='state' placeholder='post' id='post' />
-            </div>
-            <div className='flex flex-col mb-2'>
-              <label htmlFor="post">State</label>
-              <Select value={state.post}  options={stateopt} className='p-2  mt-1 outline-0 focus:border-blue-500 rounded-md' type="text" name='state' placeholder='post' id='post' />
-            </div>
-            <div className='flex flex-col mb-2'>
-              <label htmlFor="post">City</label>
-              <Select value={state.post}  options={cityopt} className='p-2  mt-1 outline-0 focus:border-blue-500 rounded-md' type="text" name='state' placeholder='post' id='post' />
-            </div>
-          
-          
-            <div className="flex items-center justify-end mt-4">
-            
-              <div className='mt-4 gap-3 flex justify-center items-center'>
-              <button onClick={pre} className='px-3 py-2 text-lg rounded-md w-full text-white bg-blue-500'>Previous</button>
-              <button onClick={next} className='px-3 py-2 text-lg rounded-md w-full text-white bg-blue-500'>Next</button>
-            </div>
-          </div>
-          </div>
-        }
-
       </div>
     </div>
   );

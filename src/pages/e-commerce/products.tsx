@@ -24,6 +24,8 @@ import {
   HiUpload,
 } from "react-icons/hi";
 import NavbarSidebarLayout from "../../layouts/navbar-sidebar";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import { Pagination } from "../users/list";
 
 const EcommerceProductsPage: FC = function () {
@@ -119,8 +121,8 @@ const SearchForProducts: FC = function () {
 
 const AddProductModal: FC = function () {
   const [isOpen, setOpen] = useState(false);
-const [productImage,setproductImage] = useState([{}])
 const [productImageURL,setproductImageURL] = useState([])
+
   const [data,setData] = useState({
     name:"",
     category:"",
@@ -140,7 +142,10 @@ const [productImageURL,setproductImageURL] = useState([])
   const [subcategory,setSubcategory] = useState(category != null && category[0])
   const getCat = async() =>{
     const fetchcat = await fetch(`${window.path}/getcategory`,{
-      method:"get"
+      method:"get",
+      headers:{
+        auth:localStorage.getItem("sellerAuth")
+      }
     })
     const cat = await fetchcat.json()
     if(cat.status ==1 ){
@@ -150,12 +155,14 @@ const [productImageURL,setproductImageURL] = useState([])
       setcategory(cate)
     }
   }
-  const getSubCat = async() =>{
-    const fetchcat = await fetch(`${window.path}/getsubcategory/${data?.category?.value ? data?.category?.value : category.length>0 && category[0]._id}`,{
-      method:"get"
+  const getSubCat = async(e) =>{
+    const fetchcat = await fetch(`${window.path}/getsubcategory/${e.value ? e?.value : category.length>0 && category[0]._id }`,{
+      method:"get",
+      headers:{
+        auth:localStorage.getItem("sellerAuth")
+      }
     })
     const cat = await fetchcat.json()
-    console.log(cat)
     if(cat.status ==1 ){
         const cate = cat.result?.map((e)=>{
           return({label:e.name,value:e._id})
@@ -170,12 +177,12 @@ const [productImageURL,setproductImageURL] = useState([])
   useEffect(()=>{
     getCat()
   },[])
-  useEffect(()=>{
-    getSubCat()
-  },[data.category])
+  
   
   const addProduct = async(e) =>{
     e.preventDefault()
+    
+    
     const formdata = new FormData()
     formdata.append("name",data.name)
     formdata.append("description",data.description)
@@ -184,10 +191,42 @@ const [productImageURL,setproductImageURL] = useState([])
     formdata.append("brand",data.brand)
     formdata.append("category",data.category.value)
     formdata.append("sub_category",data.sub_category.value)
+    productImageURL.map((e)=>{
+      formdata.append("product",e)
+    })
+
+    const fetchdata = await fetch(`${window.path}/addproduct`,{
+      headers:{
+        auth:localStorage.getItem("sellerAuth")
+      },
+      method:"post",
+      body:formdata
+      
+    })
+    const resp = await fetchdata.json()
+    if(resp.status == 1){
+      setData({
+        name:"",
+    category:"",
+    sub_category:"",
+    brand : "",
+    price :"",
+    discounted_price : "",
+    description:"",
+      })
+    }
+    setproductImageURL([])
+    toast.success("Product Added Successfully",{
+      position:"top-center",
+      autoClose:400,
+      progress:false
+    })
   }
+  
   return (
     <>
       <Button color="primary" onClick={() => setOpen(!isOpen)}>
+        <ToastContainer/>
         <FaPlus className="mr-2 text-lg" />
        Add Product
       </Button>
@@ -217,7 +256,7 @@ const [productImageURL,setproductImageURL] = useState([])
                   <Select
                   id="category"
                   name="category"
-                  onChange = {(e)=>{setData({...data,category:e});}}
+                  onChange = {(e)=>{setData({...data,category:e}); getSubCat(e)}}
                   defaultInputValue={category[0]}
                   value={data.category}
                   options={category}
@@ -295,7 +334,7 @@ const [productImageURL,setproductImageURL] = useState([])
                     <div>
                   <img
                     alt="Apple iMac 1"
-                    src={e}
+                    src={URL.createObjectURL(e)}
                     className="h-24"
                     />
                   <a href="#" className="cursor-pointer">
@@ -314,7 +353,7 @@ const [productImageURL,setproductImageURL] = useState([])
                 <div className="flex w-full items-center justify-center">
                   <label className="flex h-32 w-full cursor-pointer flex-col rounded border-2 border-dashed border-gray-300 hover:bg-gray-50 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-700" onChange={(e)=>{
                     if(productImageURL.length<3){
-                      setproductImageURL([...productImageURL,URL.createObjectURL(e.target.files[0])])
+                      setproductImageURL([...productImageURL,e.target.files[0]])
                     }
                   }}>
                     <div className="flex flex-col items-center justify-center pt-5 pb-6">
@@ -530,6 +569,23 @@ const DeleteProductModal: FC = function () {
 };
 
 const ProductsTable: FC = function () {
+  const [products,setProducts] = useState(null)
+  const getProduct = async() =>{
+    const fetchdata = await fetch(`${window.path}/getproducts`,{
+      method:"get",
+      headers:{
+        auth:localStorage.getItem("sellerAuth")
+      }
+    })
+    const resp = await fetchdata.json()
+    if(resp.status == 1){
+     
+        setProducts(resp.result)
+    }
+  }
+  useEffect(()=>{
+    getProduct()
+  },[])
   return (
     <Table className="min-w-full divide-y divide-gray-200 dark:divide-gray-600">
       <Table.Head className="bg-gray-100 dark:bg-gray-700">
@@ -538,32 +594,41 @@ const ProductsTable: FC = function () {
           <Checkbox />
         </Table.HeadCell>
         <Table.HeadCell>Product Name</Table.HeadCell>
-        <Table.HeadCell>Technology</Table.HeadCell>
-        <Table.HeadCell>ID</Table.HeadCell>
+        <Table.HeadCell>Brand</Table.HeadCell>
+        <Table.HeadCell>Discounted Pirce</Table.HeadCell>
         <Table.HeadCell>Price</Table.HeadCell>
+        <Table.HeadCell>Category</Table.HeadCell>
+        <Table.HeadCell>Sub Category</Table.HeadCell>
         <Table.HeadCell>Actions</Table.HeadCell>
       </Table.Head>
       <Table.Body className="divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-gray-800">
+
+        {
+          products != null &&
+          products?.map((e)=>(
         <Table.Row className="hover:bg-gray-100 dark:hover:bg-gray-700">
           <Table.Cell className="w-4 p-4">
             <Checkbox />
           </Table.Cell>
           <Table.Cell className="whitespace-nowrap p-4 text-sm font-normal text-gray-500 dark:text-gray-400">
             <div className="text-base font-semibold text-gray-900 dark:text-white">
-              Education Dashboard
-            </div>
-            <div className="text-sm font-normal text-gray-500 dark:text-gray-400">
-              Html templates
+             {e.name}
             </div>
           </Table.Cell>
           <Table.Cell className="whitespace-nowrap p-4 text-base font-medium text-gray-900 dark:text-white">
-            Angular
+            {e.brand}
           </Table.Cell>
           <Table.Cell className="whitespace-nowrap p-4 text-base font-medium text-gray-900 dark:text-white">
-            #194556
+            {e.discounted_price}
           </Table.Cell>
           <Table.Cell className="whitespace-nowrap p-4 text-base font-medium text-gray-900 dark:text-white">
-            $149
+          {e.price}
+          </Table.Cell>
+          <Table.Cell className="whitespace-nowrap p-4 text-base font-medium text-gray-900 dark:text-white">
+          {e.category.name}
+          </Table.Cell>
+          <Table.Cell className="whitespace-nowrap p-4 text-base font-medium text-gray-900 dark:text-white">
+          {e.sub_category.name}
           </Table.Cell>
           <Table.Cell className="space-x-2 whitespace-nowrap p-4">
             <div className="flex items-center gap-x-3">
@@ -571,539 +636,9 @@ const ProductsTable: FC = function () {
               <DeleteProductModal />
             </div>
           </Table.Cell>
+         
         </Table.Row>
-        <Table.Row className="hover:bg-gray-100 dark:hover:bg-gray-700">
-          <Table.Cell className="w-4 p-4">
-            <Checkbox />
-          </Table.Cell>
-          <Table.Cell className="whitespace-nowrap p-4 text-sm font-normal text-gray-500 dark:text-gray-400">
-            <div className="text-base font-semibold text-gray-900 dark:text-white">
-              React UI Kit
-            </div>
-            <div className="text-sm font-normal text-gray-500 dark:text-gray-400">
-              Html templates
-            </div>
-          </Table.Cell>
-          <Table.Cell className="whitespace-nowrap p-4 text-base font-medium text-gray-900 dark:text-white">
-            React JS
-          </Table.Cell>
-          <Table.Cell className="whitespace-nowrap p-4 text-base font-medium text-gray-900 dark:text-white">
-            #623232
-          </Table.Cell>
-          <Table.Cell className="whitespace-nowrap p-4 text-base font-medium text-gray-900 dark:text-white">
-            $129
-          </Table.Cell>
-          <Table.Cell className="space-x-2 whitespace-nowrap p-4">
-            <div className="flex items-center gap-x-3">
-              <EditProductModal />
-              <DeleteProductModal />
-            </div>
-          </Table.Cell>
-        </Table.Row>
-        <Table.Row className="hover:bg-gray-100 dark:hover:bg-gray-700">
-          <Table.Cell className="w-4 p-4">
-            <Checkbox />
-          </Table.Cell>
-          <Table.Cell className="whitespace-nowrap p-4 text-sm font-normal text-gray-500 dark:text-gray-400">
-            <div className="text-base font-semibold text-gray-900 dark:text-white">
-              Education Dashboard
-            </div>
-            <div className="text-sm font-normal text-gray-500 dark:text-gray-400">
-              Html templates
-            </div>
-          </Table.Cell>
-          <Table.Cell className="whitespace-nowrap p-4 text-base font-medium text-gray-900 dark:text-white">
-            Angular
-          </Table.Cell>
-          <Table.Cell className="whitespace-nowrap p-4 text-base font-medium text-gray-900 dark:text-white">
-            #194356
-          </Table.Cell>
-          <Table.Cell className="whitespace-nowrap p-4 text-base font-medium text-gray-900 dark:text-white">
-            $149
-          </Table.Cell>
-          <Table.Cell className="space-x-2 whitespace-nowrap p-4">
-            <div className="flex items-center gap-x-3">
-              <EditProductModal />
-              <DeleteProductModal />
-            </div>
-          </Table.Cell>
-        </Table.Row>
-        <Table.Row className="hover:bg-gray-100 dark:hover:bg-gray-700">
-          <Table.Cell className="w-4 p-4">
-            <Checkbox />
-          </Table.Cell>
-          <Table.Cell className="whitespace-nowrap p-4 text-sm font-normal text-gray-500 dark:text-gray-400">
-            <div className="text-base font-semibold text-gray-900 dark:text-white">
-              React UI Kit
-            </div>
-            <div className="text-sm font-normal text-gray-500 dark:text-gray-400">
-              Html templates
-            </div>
-          </Table.Cell>
-          <Table.Cell className="whitespace-nowrap p-4 text-base font-medium text-gray-900 dark:text-white">
-            React JS
-          </Table.Cell>
-          <Table.Cell className="whitespace-nowrap p-4 text-base font-medium text-gray-900 dark:text-white">
-            #323323
-          </Table.Cell>
-          <Table.Cell className="whitespace-nowrap p-4 text-base font-medium text-gray-900 dark:text-white">
-            $129
-          </Table.Cell>
-          <Table.Cell className="space-x-2 whitespace-nowrap p-4">
-            <div className="flex items-center gap-x-3">
-              <EditProductModal />
-              <DeleteProductModal />
-            </div>
-          </Table.Cell>
-        </Table.Row>
-        <Table.Row className="hover:bg-gray-100 dark:hover:bg-gray-700">
-          <Table.Cell className="w-4 p-4">
-            <Checkbox />
-          </Table.Cell>
-          <Table.Cell className="whitespace-nowrap p-4 text-sm font-normal text-gray-500 dark:text-gray-400">
-            <div className="text-base font-semibold text-gray-900 dark:text-white">
-              Education Dashboard
-            </div>
-            <div className="text-sm font-normal text-gray-500 dark:text-gray-400">
-              Html templates
-            </div>
-          </Table.Cell>
-          <Table.Cell className="whitespace-nowrap p-4 text-base font-medium text-gray-900 dark:text-white">
-            Angular
-          </Table.Cell>
-          <Table.Cell className="whitespace-nowrap p-4 text-base font-medium text-gray-900 dark:text-white">
-            #994856
-          </Table.Cell>
-          <Table.Cell className="whitespace-nowrap p-4 text-base font-medium text-gray-900 dark:text-white">
-            $149
-          </Table.Cell>
-          <Table.Cell className="space-x-2 whitespace-nowrap p-4">
-            <div className="flex items-center gap-x-3">
-              <EditProductModal />
-              <DeleteProductModal />
-            </div>
-          </Table.Cell>
-        </Table.Row>
-        <Table.Row className="hover:bg-gray-100 dark:hover:bg-gray-700">
-          <Table.Cell className="w-4 p-4">
-            <Checkbox />
-          </Table.Cell>
-          <Table.Cell className="whitespace-nowrap p-4 text-sm font-normal text-gray-500 dark:text-gray-400">
-            <div className="text-base font-semibold text-gray-900 dark:text-white">
-              Education Dashboard
-            </div>
-            <div className="text-sm font-normal text-gray-500 dark:text-gray-400">
-              Html templates
-            </div>
-          </Table.Cell>
-          <Table.Cell className="whitespace-nowrap p-4 text-base font-medium text-gray-900 dark:text-white">
-            Angular
-          </Table.Cell>
-          <Table.Cell className="whitespace-nowrap p-4 text-base font-medium text-gray-900 dark:text-white">
-            #194256
-          </Table.Cell>
-          <Table.Cell className="whitespace-nowrap p-4 text-base font-medium text-gray-900 dark:text-white">
-            $149
-          </Table.Cell>
-          <Table.Cell className="space-x-2 whitespace-nowrap p-4">
-            <div className="flex items-center gap-x-3">
-              <EditProductModal />
-              <DeleteProductModal />
-            </div>
-          </Table.Cell>
-        </Table.Row>
-        <Table.Row className="hover:bg-gray-100 dark:hover:bg-gray-700">
-          <Table.Cell className="w-4 p-4">
-            <Checkbox />
-          </Table.Cell>
-          <Table.Cell className="whitespace-nowrap p-4 text-sm font-normal text-gray-500 dark:text-gray-400">
-            <div className="text-base font-semibold text-gray-900 dark:text-white">
-              React UI Kit
-            </div>
-            <div className="text-sm font-normal text-gray-500 dark:text-gray-400">
-              Html templates
-            </div>
-          </Table.Cell>
-          <Table.Cell className="whitespace-nowrap p-4 text-base font-medium text-gray-900 dark:text-white">
-            React JS
-          </Table.Cell>
-          <Table.Cell className="whitespace-nowrap p-4 text-base font-medium text-gray-900 dark:text-white">
-            #623378
-          </Table.Cell>
-          <Table.Cell className="whitespace-nowrap p-4 text-base font-medium text-gray-900 dark:text-white">
-            $129
-          </Table.Cell>
-          <Table.Cell className="space-x-2 whitespace-nowrap p-4">
-            <div className="flex items-center gap-x-3">
-              <EditProductModal />
-              <DeleteProductModal />
-            </div>
-          </Table.Cell>
-        </Table.Row>
-        <Table.Row className="hover:bg-gray-100 dark:hover:bg-gray-700">
-          <Table.Cell className="w-4 p-4">
-            <Checkbox />
-          </Table.Cell>
-          <Table.Cell className="whitespace-nowrap p-4 text-sm font-normal text-gray-500 dark:text-gray-400">
-            <div className="text-base font-semibold text-gray-900 dark:text-white">
-              Education Dashboard
-            </div>
-            <div className="text-sm font-normal text-gray-500 dark:text-gray-400">
-              Html templates
-            </div>
-          </Table.Cell>
-          <Table.Cell className="whitespace-nowrap p-4 text-base font-medium text-gray-900 dark:text-white">
-            Angular
-          </Table.Cell>
-          <Table.Cell className="whitespace-nowrap p-4 text-base font-medium text-gray-900 dark:text-white">
-            #192856
-          </Table.Cell>
-          <Table.Cell className="whitespace-nowrap p-4 text-base font-medium text-gray-900 dark:text-white">
-            $149
-          </Table.Cell>
-          <Table.Cell className="space-x-2 whitespace-nowrap p-4">
-            <div className="flex items-center gap-x-3">
-              <EditProductModal />
-              <DeleteProductModal />
-            </div>
-          </Table.Cell>
-        </Table.Row>
-        <Table.Row className="hover:bg-gray-100 dark:hover:bg-gray-700">
-          <Table.Cell className="w-4 p-4">
-            <Checkbox />
-          </Table.Cell>
-          <Table.Cell className="whitespace-nowrap p-4 text-sm font-normal text-gray-500 dark:text-gray-400">
-            <div className="text-base font-semibold text-gray-900 dark:text-white">
-              React UI Kit
-            </div>
-            <div className="text-sm font-normal text-gray-500 dark:text-gray-400">
-              Html templates
-            </div>
-          </Table.Cell>
-          <Table.Cell className="whitespace-nowrap p-4 text-base font-medium text-gray-900 dark:text-white">
-            React JS
-          </Table.Cell>
-          <Table.Cell className="whitespace-nowrap p-4 text-base font-medium text-gray-900 dark:text-white">
-            #523323
-          </Table.Cell>
-          <Table.Cell className="whitespace-nowrap p-4 text-base font-medium text-gray-900 dark:text-white">
-            $129
-          </Table.Cell>
-          <Table.Cell className="space-x-2 whitespace-nowrap p-4">
-            <div className="flex items-center gap-x-3">
-              <EditProductModal />
-              <DeleteProductModal />
-            </div>
-          </Table.Cell>
-        </Table.Row>
-        <Table.Row className="hover:bg-gray-100 dark:hover:bg-gray-700">
-          <Table.Cell className="w-4 p-4">
-            <Checkbox />
-          </Table.Cell>
-          <Table.Cell className="whitespace-nowrap p-4 text-sm font-normal text-gray-500 dark:text-gray-400">
-            <div className="text-base font-semibold text-gray-900 dark:text-white">
-              Education Dashboard
-            </div>
-            <div className="text-sm font-normal text-gray-500 dark:text-gray-400">
-              Html templates
-            </div>
-          </Table.Cell>
-          <Table.Cell className="whitespace-nowrap p-4 text-base font-medium text-gray-900 dark:text-white">
-            Angular
-          </Table.Cell>
-          <Table.Cell className="whitespace-nowrap p-4 text-base font-medium text-gray-900 dark:text-white">
-            #191857
-          </Table.Cell>
-          <Table.Cell className="whitespace-nowrap p-4 text-base font-medium text-gray-900 dark:text-white">
-            $149
-          </Table.Cell>
-          <Table.Cell className="space-x-2 whitespace-nowrap p-4">
-            <div className="flex items-center gap-x-3">
-              <EditProductModal />
-              <DeleteProductModal />
-            </div>
-          </Table.Cell>
-        </Table.Row>
-        <Table.Row className="hover:bg-gray-100 dark:hover:bg-gray-700">
-          <Table.Cell className="w-4 p-4">
-            <Checkbox />
-          </Table.Cell>
-          <Table.Cell className="whitespace-nowrap p-4 text-sm font-normal text-gray-500 dark:text-gray-400">
-            <div className="text-base font-semibold text-gray-900 dark:text-white">
-              Education Dashboard
-            </div>
-            <div className="text-sm font-normal text-gray-500 dark:text-gray-400">
-              Html templates
-            </div>
-          </Table.Cell>
-          <Table.Cell className="whitespace-nowrap p-4 text-base font-medium text-gray-900 dark:text-white">
-            Angular
-          </Table.Cell>
-          <Table.Cell className="whitespace-nowrap p-4 text-base font-medium text-gray-900 dark:text-white">
-            #914856
-          </Table.Cell>
-          <Table.Cell className="whitespace-nowrap p-4 text-base font-medium text-gray-900 dark:text-white">
-            $149
-          </Table.Cell>
-          <Table.Cell className="space-x-2 whitespace-nowrap p-4">
-            <div className="flex items-center gap-x-3">
-              <EditProductModal />
-              <DeleteProductModal />
-            </div>
-          </Table.Cell>
-        </Table.Row>
-        <Table.Row className="hover:bg-gray-100 dark:hover:bg-gray-700">
-          <Table.Cell className="w-4 p-4">
-            <Checkbox />
-          </Table.Cell>
-          <Table.Cell className="whitespace-nowrap p-4 text-sm font-normal text-gray-500 dark:text-gray-400">
-            <div className="text-base font-semibold text-gray-900 dark:text-white">
-              React UI Kit
-            </div>
-            <div className="text-sm font-normal text-gray-500 dark:text-gray-400">
-              Html templates
-            </div>
-          </Table.Cell>
-          <Table.Cell className="whitespace-nowrap p-4 text-base font-medium text-gray-900 dark:text-white">
-            React JS
-          </Table.Cell>
-          <Table.Cell className="whitespace-nowrap p-4 text-base font-medium text-gray-900 dark:text-white">
-            #633293
-          </Table.Cell>
-          <Table.Cell className="whitespace-nowrap p-4 text-base font-medium text-gray-900 dark:text-white">
-            $129
-          </Table.Cell>
-          <Table.Cell className="space-x-2 whitespace-nowrap p-4">
-            <div className="flex items-center gap-x-3">
-              <EditProductModal />
-              <DeleteProductModal />
-            </div>
-          </Table.Cell>
-        </Table.Row>
-        <Table.Row className="hover:bg-gray-100 dark:hover:bg-gray-700">
-          <Table.Cell className="w-4 p-4">
-            <Checkbox />
-          </Table.Cell>
-          <Table.Cell className="whitespace-nowrap p-4 text-sm font-normal text-gray-500 dark:text-gray-400">
-            <div className="text-base font-semibold text-gray-900 dark:text-white">
-              Education Dashboard
-            </div>
-            <div className="text-sm font-normal text-gray-500 dark:text-gray-400">
-              Html templates
-            </div>
-          </Table.Cell>
-          <Table.Cell className="whitespace-nowrap p-4 text-base font-medium text-gray-900 dark:text-white">
-            Angular
-          </Table.Cell>
-          <Table.Cell className="whitespace-nowrap p-4 text-base font-medium text-gray-900 dark:text-white">
-            #924856
-          </Table.Cell>
-          <Table.Cell className="whitespace-nowrap p-4 text-base font-medium text-gray-900 dark:text-white">
-            $149
-          </Table.Cell>
-          <Table.Cell className="space-x-2 whitespace-nowrap p-4">
-            <div className="flex items-center gap-x-3">
-              <EditProductModal />
-              <DeleteProductModal />
-            </div>
-          </Table.Cell>
-        </Table.Row>
-        <Table.Row className="hover:bg-gray-100 dark:hover:bg-gray-700">
-          <Table.Cell className="w-4 p-4">
-            <Checkbox />
-          </Table.Cell>
-          <Table.Cell className="whitespace-nowrap p-4 text-sm font-normal text-gray-500 dark:text-gray-400">
-            <div className="text-base font-semibold text-gray-900 dark:text-white">
-              React UI Kit
-            </div>
-            <div className="text-sm font-normal text-gray-500 dark:text-gray-400">
-              Html templates
-            </div>
-          </Table.Cell>
-          <Table.Cell className="whitespace-nowrap p-4 text-base font-medium text-gray-900 dark:text-white">
-            React JS
-          </Table.Cell>
-          <Table.Cell className="whitespace-nowrap p-4 text-base font-medium text-gray-900 dark:text-white">
-            #123323
-          </Table.Cell>
-          <Table.Cell className="whitespace-nowrap p-4 text-base font-medium text-gray-900 dark:text-white">
-            $129
-          </Table.Cell>
-          <Table.Cell className="space-x-2 whitespace-nowrap p-4">
-            <div className="flex items-center gap-x-3">
-              <EditProductModal />
-              <DeleteProductModal />
-            </div>
-          </Table.Cell>
-        </Table.Row>
-        <Table.Row className="hover:bg-gray-100 dark:hover:bg-gray-700">
-          <Table.Cell className="w-4 p-4">
-            <Checkbox />
-          </Table.Cell>
-          <Table.Cell className="whitespace-nowrap p-4 text-sm font-normal text-gray-500 dark:text-gray-400">
-            <div className="text-base font-semibold text-gray-900 dark:text-white">
-              Education Dashboard
-            </div>
-            <div className="text-sm font-normal text-gray-500 dark:text-gray-400">
-              Html templates
-            </div>
-          </Table.Cell>
-          <Table.Cell className="whitespace-nowrap p-4 text-base font-medium text-gray-900 dark:text-white">
-            Angular
-          </Table.Cell>
-          <Table.Cell className="whitespace-nowrap p-4 text-base font-medium text-gray-900 dark:text-white">
-            #198856
-          </Table.Cell>
-          <Table.Cell className="whitespace-nowrap p-4 text-base font-medium text-gray-900 dark:text-white">
-            $149
-          </Table.Cell>
-          <Table.Cell className="space-x-2 whitespace-nowrap p-4">
-            <div className="flex items-center gap-x-3">
-              <EditProductModal />
-              <DeleteProductModal />
-            </div>
-          </Table.Cell>
-        </Table.Row>
-        <Table.Row className="hover:bg-gray-100 dark:hover:bg-gray-700">
-          <Table.Cell className="w-4 p-4">
-            <Checkbox />
-          </Table.Cell>
-          <Table.Cell className="whitespace-nowrap p-4 text-sm font-normal text-gray-500 dark:text-gray-400">
-            <div className="text-base font-semibold text-gray-900 dark:text-white">
-              Education Dashboard
-            </div>
-            <div className="text-sm font-normal text-gray-500 dark:text-gray-400">
-              Html templates
-            </div>
-          </Table.Cell>
-          <Table.Cell className="whitespace-nowrap p-4 text-base font-medium text-gray-900 dark:text-white">
-            Angular
-          </Table.Cell>
-          <Table.Cell className="whitespace-nowrap p-4 text-base font-medium text-gray-900 dark:text-white">
-            #132856
-          </Table.Cell>
-          <Table.Cell className="whitespace-nowrap p-4 text-base font-medium text-gray-900 dark:text-white">
-            $149
-          </Table.Cell>
-          <Table.Cell className="space-x-2 whitespace-nowrap p-4">
-            <div className="flex items-center gap-x-3">
-              <EditProductModal />
-              <DeleteProductModal />
-            </div>
-          </Table.Cell>
-        </Table.Row>
-        <Table.Row className="hover:bg-gray-100 dark:hover:bg-gray-700">
-          <Table.Cell className="w-4 p-4">
-            <Checkbox />
-          </Table.Cell>
-          <Table.Cell className="whitespace-nowrap p-4 text-sm font-normal text-gray-500 dark:text-gray-400">
-            <div className="text-base font-semibold text-gray-900 dark:text-white">
-              React UI Kit
-            </div>
-            <div className="text-sm font-normal text-gray-500 dark:text-gray-400">
-              Html templates
-            </div>
-          </Table.Cell>
-          <Table.Cell className="whitespace-nowrap p-4 text-base font-medium text-gray-900 dark:text-white">
-            React JS
-          </Table.Cell>
-          <Table.Cell className="whitespace-nowrap p-4 text-base font-medium text-gray-900 dark:text-white">
-            #613223
-          </Table.Cell>
-          <Table.Cell className="whitespace-nowrap p-4 text-base font-medium text-gray-900 dark:text-white">
-            $129
-          </Table.Cell>
-          <Table.Cell className="space-x-2 whitespace-nowrap p-4">
-            <div className="flex items-center gap-x-3">
-              <EditProductModal />
-              <DeleteProductModal />
-            </div>
-          </Table.Cell>
-        </Table.Row>
-        <Table.Row className="hover:bg-gray-100 dark:hover:bg-gray-700">
-          <Table.Cell className="w-4 p-4">
-            <Checkbox />
-          </Table.Cell>
-          <Table.Cell className="whitespace-nowrap p-4 text-sm font-normal text-gray-500 dark:text-gray-400">
-            <div className="text-base font-semibold text-gray-900 dark:text-white">
-              Education Dashboard
-            </div>
-            <div className="text-sm font-normal text-gray-500 dark:text-gray-400">
-              Html templates
-            </div>
-          </Table.Cell>
-          <Table.Cell className="whitespace-nowrap p-4 text-base font-medium text-gray-900 dark:text-white">
-            Angular
-          </Table.Cell>
-          <Table.Cell className="whitespace-nowrap p-4 text-base font-medium text-gray-900 dark:text-white">
-            #484856
-          </Table.Cell>
-          <Table.Cell className="whitespace-nowrap p-4 text-base font-medium text-gray-900 dark:text-white">
-            $149
-          </Table.Cell>
-          <Table.Cell className="space-x-2 whitespace-nowrap p-4">
-            <div className="flex items-center gap-x-3">
-              <EditProductModal />
-              <DeleteProductModal />
-            </div>
-          </Table.Cell>
-        </Table.Row>
-        <Table.Row className="hover:bg-gray-100 dark:hover:bg-gray-700">
-          <Table.Cell className="w-4 p-4">
-            <Checkbox />
-          </Table.Cell>
-          <Table.Cell className="whitespace-nowrap p-4 text-sm font-normal text-gray-500 dark:text-gray-400">
-            <div className="text-base font-semibold text-gray-900 dark:text-white">
-              React UI Kit
-            </div>
-            <div className="text-sm font-normal text-gray-500 dark:text-gray-400">
-              Html templates
-            </div>
-          </Table.Cell>
-          <Table.Cell className="whitespace-nowrap p-4 text-base font-medium text-gray-900 dark:text-white">
-            React JS
-          </Table.Cell>
-          <Table.Cell className="whitespace-nowrap p-4 text-base font-medium text-gray-900 dark:text-white">
-            #103324
-          </Table.Cell>
-          <Table.Cell className="whitespace-nowrap p-4 text-base font-medium text-gray-900 dark:text-white">
-            $129
-          </Table.Cell>
-          <Table.Cell className="space-x-2 whitespace-nowrap p-4">
-            <div className="flex items-center gap-x-3">
-              <EditProductModal />
-              <DeleteProductModal />
-            </div>
-          </Table.Cell>
-        </Table.Row>
-        <Table.Row className="hover:bg-gray-100 dark:hover:bg-gray-700">
-          <Table.Cell className="w-4 p-4">
-            <Checkbox />
-          </Table.Cell>
-          <Table.Cell className="whitespace-nowrap p-4 text-sm font-normal text-gray-500 dark:text-gray-400">
-            <div className="text-base font-semibold text-gray-900 dark:text-white">
-              Education Dashboard
-            </div>
-            <div className="text-sm font-normal text-gray-500 dark:text-gray-400">
-              Html templates
-            </div>
-          </Table.Cell>
-          <Table.Cell className="whitespace-nowrap p-4 text-base font-medium text-gray-900 dark:text-white">
-            Angular
-          </Table.Cell>
-          <Table.Cell className="whitespace-nowrap p-4 text-base font-medium text-gray-900 dark:text-white">
-            #124859
-          </Table.Cell>
-          <Table.Cell className="whitespace-nowrap p-4 text-base font-medium text-gray-900 dark:text-white">
-            $149
-          </Table.Cell>
-          <Table.Cell className="space-x-2 whitespace-nowrap p-4">
-            <div className="flex items-center gap-x-3">
-              <EditProductModal />
-              <DeleteProductModal />
-            </div>
-          </Table.Cell>
-        </Table.Row>
+      ))}
       </Table.Body>
     </Table>
   );

@@ -22,7 +22,7 @@ window.path = "http://localhost:4040/seller"
 const root = createRoot(container);
 if(!localStorage.getItem("adminauth")){
   if(!localStorage.getItem("signupform")){
-
+    console.log("hey")
     localStorage.setItem("signupform",1)
   }
 } 

@@ -1,12 +1,65 @@
 /* eslint-disable jsx-a11y/anchor-is-valid */
 import { Button, Card, Checkbox, Label, TextInput } from "flowbite-react";
-import type { FC } from "react";
-
+import type { FC} from "react";
+import { useState } from "react";
+import { ToastContainer, toast } from 'react-toastify';
+import { useNavigate } from 'react-router-dom';
+import 'react-toastify/dist/ReactToastify.css';
 const SignInPage: FC = function () {
-  // const []
+  const navigate = useNavigate()
+  const [email,setEmail] = useState("")
+  const [password,setPassword] = useState("")
+  
+const hanldelogin = async() =>{
+  if(email.length == 0 ){
+    toast.error("please fill Email Properly",{
+      autoClose:200,
+      progress:false,
+      theme:"light",
+  })
+  return
+  } 
+  if(password.length == 0 ){
+    toast.error("please fill Email Properly",{
+      autoClose:200,
+      progress:false,
+      theme:"light",
+  })
+  return
+  }
+  const formdata = new FormData()
+  formdata.append("email",email)
+  formdata.append("password",password)
+  const fetchdata = await fetch(`${window.path}/login`,{
+    method:'post',
+    body:formdata
+  })
+  const resp = await fetchdata.json()
+  console.log(resp)
+  if(resp.status == 1){
+      localStorage.setItem("sellerAuth",resp.token)
+      navigate("/")
+  } 
+  else if (resp.status == -1){
+    toast.error("Invalid Password or username!",{
+      autoClose:200,
+      progress:false,
+      theme:"light",
+  })
+  }else{
+    toast.error("Internal Server Error!",{
+      autoClose:200,
+      progress:false,
+      theme:"light",
+  })
+  }
+}
+
+  
   return (
     <div className="flex flex-col items-center justify-center px-6 lg:h-screen lg:w-screen lg:gap-y-12">
       <div className="my-6 flex items-center gap-x-1 lg:my-0">
+      <ToastContainer/>
         <img
           alt="Flowbite logo"
           src="https://flowbite.com/docs/images/logo.svg"
@@ -25,7 +78,7 @@ const SignInPage: FC = function () {
         <h1 className="mb-3 text-2xl font-bold dark:text-white md:text-3xl">
           Sign in to Pricee
         </h1>
-        <form>
+      
           <div className="mb-4 flex flex-col gap-y-3">
             <Label htmlFor="email">Your email</Label>
             <TextInput
@@ -33,6 +86,8 @@ const SignInPage: FC = function () {
               name="email"
               placeholder="name@company.com"
               type="email"
+              value={email}
+              onChange={(e)=>{setEmail(e.target.value)}}
             />
           </div>
           <div className="mb-6 flex flex-col gap-y-3">
@@ -42,13 +97,11 @@ const SignInPage: FC = function () {
               name="password"
               placeholder="••••••••"
               type="password"
+              value={password}
+              onChange={(e)=>{setPassword(e.target.value)}}
             />
           </div>
-          <div className="mb-6 flex items-center justify-between">
-            <div className="flex items-center gap-x-3">
-              <Checkbox id="rememberMe" name="rememberMe" />
-              <Label htmlFor="rememberMe">Remember me</Label>
-            </div>
+          <div className="mb-6 flex items-center justify-end">
             <a
               href="#"
               className="w-1/2 text-right text-sm text-primary-600 dark:text-primary-300"
@@ -57,7 +110,7 @@ const SignInPage: FC = function () {
             </a>
           </div>
           <div className="mb-6">
-            <Button type="submit" className="w-full lg:w-auto">
+            <Button type="submit" className="w-full lg:w-auto" onClick={hanldelogin}>
               Login to your account
             </Button>
           </div>
@@ -67,7 +120,7 @@ const SignInPage: FC = function () {
               Create account
             </a>
           </p>
-        </form>
+        
       </Card>
     </div>
   );
