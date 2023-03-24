@@ -25,7 +25,7 @@ if(!localStorage.getItem("adminauth")){
 
     localStorage.setItem("signupform",1)
   }
-}
+} 
 root.render(
   <StrictMode>
     <Flowbite theme={{ theme }}>

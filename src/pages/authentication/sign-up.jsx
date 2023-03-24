@@ -120,6 +120,7 @@ function App() {
             
         }
         else if (formNo == 2){
+          
           setFormNo(formNo + 1)
           localStorage.setItem("signupform",2)
         }
