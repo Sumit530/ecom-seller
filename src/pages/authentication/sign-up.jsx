@@ -4,8 +4,19 @@ import 'react-toastify/dist/ReactToastify.css';
 import { useNavigate } from 'react-router-dom';
 import { City,State,Country } from 'country-state-city';
 import Select from 'react-select';
+import image from "../../assets/images/signup.jpg"
+import image2 from "../../assets/images/signup2.jpg"
+import image3 from "../../assets/images/signup3.jpg"
+import image4 from "../../assets/images/signup4.jpg"
+import image5 from "../../assets/images/signup5.jpg"
+import image6 from "../../assets/images/signup6.jpg"
+import image7 from "../../assets/images/signup7.jpg"
+import image8 from "../../assets/images/signup8.jpg"
+import image9 from "../../assets/images/signup9.jpg"
 function App() {
   const formArray = [1, 2, 3, 4];
+  const imgeArray= [image,image2,image3,image4,image5,image7,image8,image9,image]
+  
   const navigate = useNavigate()
   const [state, setState] = useState({
     name: '',
@@ -259,6 +270,7 @@ function App() {
         }
   
   }
+ 
   const pre = () => {
     if(formNo != 1){
 
@@ -273,11 +285,22 @@ function App() {
     }
   }
   return (
-    <div className="w-screen h-screen bg-slate-300 flex justify-center items-center">
+    <> 
+    <div className='absolute w-full'>
+    <h1 className='  flex justify-center mt-10 text-4xl'>Sign Up</h1>
+    </div>
+    <div className="w-screen h-screen ">
+    <div className='bg-slate-300 flex justify-center items-center h-full '>
+
+    
       <ToastContainer />
-      <div className="card w-[500px] rounded-md shadow-md bg-white p-5">
+      <div className='h-[35rem]'>
+        <img src={imgeArray[Math.floor(Math.random() * 10) + 1]} alt="" className='h-full' />
+      </div>
+      <div className="card w-[500px]  bg-white p-5">
         <div className='flex justify-center items-center'>
           {
+
             formArray.map((v, i) => <><div className={`w-[35px] my-3 text-white rounded-full ${formNo>=v ? 'bg-blue-500 ' : 'bg-gray-400'} h-[35px] flex justify-center items-center`}>
               {v}
             </div>
@@ -480,7 +503,9 @@ function App() {
        </div>
         }
       </div>
+      </div>
     </div>
+    </>
   );
 }
 
