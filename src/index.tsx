@@ -4,7 +4,7 @@ import { createRoot } from "react-dom/client";
 import "./index.css";
 import theme from "./flowbite-theme";
 import { Flowbite } from "flowbite-react";
-import { Routes, Route } from "react-router";
+import { Routes, Route, useNavigate,Navigate } from "react-router";
 import { BrowserRouter } from "react-router-dom";
 import DashboardPage from "./pages";
 import SignInPage from "./pages/authentication/sign-in";
@@ -31,14 +31,23 @@ root.render(
     <Flowbite theme={{ theme }}>
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<DashboardPage />} index />
-          <Route path="/authentication/sign-in" element={<SignInPage />} />
-          <Route path="/authentication/sign-up" element={<SignUpPage />} />
-          <Route
+          {
+              localStorage.getItem("sellerAuth") ? 
+              <>
+            <Route path="/" element={<DashboardPage />} index />
+            <Route
             path="/e-commerce/products"
             element={<EcommerceProductsPage />}
-          />
-          <Route path="/users/list" element={<UserListPage />} />
+            />
+            <Route path="/users/list" element={<UserListPage  />} />
+            </>
+         :   
+         <>
+         <Route path="*" element={<Navigate  replace={true}  to="/authentication/sign-in"/>} />
+         <Route path="/authentication/sign-in" element={<SignInPage />} />
+          <Route path="/authentication/sign-up" element={<SignUpPage />} />
+         </>
+        }
         </Routes>
       </BrowserRouter>
     </Flowbite>

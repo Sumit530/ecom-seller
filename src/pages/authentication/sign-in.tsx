@@ -4,7 +4,7 @@ import type { FC} from "react";
 import { useState } from "react";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate,LInk, Link } from 'react-router-dom';
 const SignInPage: FC = function () {
   const navigate = useNavigate()
   const [email,setEmail] = useState("")
@@ -116,9 +116,9 @@ const hanldelogin = async() =>{
           </div>
           <p className="text-sm text-gray-500 dark:text-gray-300">
             Not registered?&nbsp;
-            <a href="#" className="text-primary-600 dark:text-primary-300">
+            <Link to="/authentication/sign-up" className="text-primary-600 dark:text-primary-300">
               Create account
-            </a>
+            </Link>
           </p>
         
       </Card>
