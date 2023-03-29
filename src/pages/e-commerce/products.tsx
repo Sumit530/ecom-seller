@@ -13,6 +13,7 @@ import Select from 'react-select'
 import { FC, useEffect } from "react";
 import { useState } from "react";
 import { FaPlus } from "react-icons/fa";
+import 'react-toastify/dist/ReactToastify.css';
 import {
   HiCog,
   HiDotsVertical,
@@ -97,7 +98,7 @@ const EcommerceProductsPage: FC = function () {
           </div>
         </div>
       </div>
-      <Pagination />
+      
     </NavbarSidebarLayout>
   );
 };
@@ -140,6 +141,8 @@ const [productImageURL,setproductImageURL] = useState([])
   }
   const [category,setcategory] = useState(null)
   const [subcategory,setSubcategory] = useState(category != null && category[0])
+  const [countOfField,setCountOfField] = useState(1)
+  const [specification,setSpecification] = useState([{key:"",value:''}])
   const getCat = async() =>{
     const fetchcat = await fetch(`${window.path}/getcategory`,{
       method:"get",
@@ -182,7 +185,78 @@ const [productImageURL,setproductImageURL] = useState([])
   const addProduct = async(e) =>{
     e.preventDefault()
     
-    
+    if(data.name.length == 0  ){
+      toast.error("please fill product name Properly",{
+        autoClose:200,
+        progress:false,
+        theme:"light",
+    })
+    return
+    }
+    if(data.description.length == 0  ){
+      toast.error("please fill description Properly",{
+        autoClose:200,
+        progress:false,
+        theme:"light",
+    })
+    return
+    }
+    if(data.price.length == 0 && /^\d+$/.test(data.price) ){
+      toast.error("please fill price Properly",{
+        autoClose:200,
+        progress:false,
+        theme:"light",
+    })
+    return
+    }
+    if(data.discounted_price.length == 0 && /^\d+$/.test(data.discounted_price) ){
+      toast.error("please fill discounted price Properly",{
+        autoClose:200,
+        progress:false,
+        theme:"light",
+    })
+    return
+    }
+    if(data.brand.length == 0  ){
+      toast.error("please fill brand Properly",{
+        autoClose:200,
+        progress:false,
+        theme:"light",
+    })
+    return
+    }
+    if(!data.category?.value ){
+      toast.error("please fill category Properly",{
+        autoClose:200,
+        progress:false,
+        theme:"light",
+    })
+    return
+    }
+    if(!data.sub_category?.value  ){
+      toast.error("please fill sub Category Properly",{
+        autoClose:200,
+        progress:false,
+        theme:"light",
+    })
+    return
+    }
+    const specificationCheck = specification.map((e)=>{
+      if(e.key.length == 0 || e.value.length == 0){
+        return false
+      }
+      else {
+        return true
+      }
+    })
+    if(specificationCheck == false){
+      toast.error("please fill Specification Properly",{
+        autoClose:200,
+        progress:false,
+        theme:"light",
+    })
+    return
+    }
     const formdata = new FormData()
     formdata.append("name",data.name)
     formdata.append("description",data.description)
@@ -191,6 +265,9 @@ const [productImageURL,setproductImageURL] = useState([])
     formdata.append("brand",data.brand)
     formdata.append("category",data.category.value)
     formdata.append("sub_category",data.sub_category.value)
+    specification.map((e)=>{
+      formdata.append("specification",JSON.stringify(e))
+    })
     productImageURL.map((e)=>{
       formdata.append("product",e)
     })
@@ -221,22 +298,25 @@ const [productImageURL,setproductImageURL] = useState([])
       autoClose:400,
       progress:false
     })
+    window.location.reload(false)
+    
   }
   
   return (
     <>
+
       <Button color="primary" onClick={() => setOpen(!isOpen)}>
         <ToastContainer/>
         <FaPlus className="mr-2 text-lg" />
        Add Product
       </Button>
-      <Modal onClose={() => setOpen(false)} show={isOpen}>
-        <Modal.Header className="border-b border-gray-200 !p-6 dark:border-gray-700">
+      <Modal onClose={() => setOpen(false)} show={isOpen}  className="h-screen" >
+        <Modal.Header className="border-b border-gray-200   !p-6 dark:border-gray-700">
           <strong>Add Product</strong>
-        </Modal.Header>
-        <Modal.Body>
-          <form>
-            <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        </Modal.Header >
+        <Modal.Body className="overflow  h-[80%] " >
+          <form className="h-[35rem] overflow-y-scroll scrollbar-hide">
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 ">
               <div>
                 <Label htmlFor="productName">Product name</Label>
                 <TextInput
@@ -280,6 +360,7 @@ const [productImageURL,setproductImageURL] = useState([])
                   />
                 }
               </div>
+              
               <div>
                 <Label htmlFor="brand">Brand</Label>
                 <TextInput
@@ -314,6 +395,65 @@ const [productImageURL,setproductImageURL] = useState([])
                   placeholder="15555"
                   className="mt-1"
                 />
+              </div>
+              <Label htmlFor="" className="col-span-2 -mb-5">Specifications</Label>
+              {
+                  specification.map((e,i)=>(
+                    <>
+                <div>
+                <Label htmlFor="price"> key</Label>
+                <TextInput
+                  id="price"
+                  name="key"
+                  onChange = {(e)=>{
+                    let data = [...specification];
+                    data[i]['key'] = e.target.value;
+                    setSpecification(data)
+                  }
+                  }
+                  value={e?.key}
+                  type="text"
+                  placeholder="Model"
+                  className="mt-1"
+                  />
+              </div>
+              <div>
+                <Label htmlFor="Discountprice">Value</Label>
+                <span className="grid grid-cols-12">
+                <TextInput
+                  id="Discountprice"
+                  name="discounted_price"
+                  onChange = {(e)=>{
+                    let data = [...specification];
+                    data[i]['value'] = e.target.value;
+                    setSpecification(data)
+                  }
+                  }
+                  value={e?.value}
+                  type="text"
+                  placeholder="Kent RO"
+                  className="mt-1 col-span-11"
+                  />
+                  {
+                    
+                    <span className="flex justify-center items-center mr-1 cursor-pointer" onClick={()=>{
+                    if(specification.length>1){
+                      let data = [...specification];
+                      data.splice(i, 1)
+                      setSpecification(data)
+                                       
+                    }
+                    }}><HiTrash className="text-2xl text-red-500  " /> </span>
+                  }
+                  </span>
+                  </div> 
+                </>
+                  ))
+                }
+              <div className="col-span-2 mr-4">
+              <Button color="primary" className="float-right mr-5" onClick={()=>{setCountOfField(countOfField+1);setSpecification([...specification,{key:"",value:""}])}}>
+            Add More
+          </Button>
               </div>
               <div className="lg:col-span-2">
                 <Label htmlFor="productDetails">Product details</Label>
@@ -534,12 +674,34 @@ const EditProductModal: FC = function () {
   );
 };
 
-const DeleteProductModal: FC = function () {
+const DeleteProductModal: FC = function ({id}) {
   const [isOpen, setOpen] = useState(false);
-
+  const deleteProduct = async() =>{
+    console.log("hey")
+    const formdata = new FormData()
+    formdata.append("product_id",id)
+    const fetchdata = await fetch(`${window.path}/deleteproduct`,{
+      headers:{
+        auth:localStorage.getItem("sellerAuth")
+      },  
+      method:"post",
+      body:formdata,
+    })
+    const reps = await fetchdata.json()
+    if(reps.status == 1){
+      toast.success("Product Deleted Successfully",{
+        position:"top-center",
+        autoClose:400,
+        progress:false
+      })
+      window.location.reload(false)
+      setOpen(false)
+    }
+  }
   return (
     <>
       <Button color="failure" onClick={() => setOpen(!isOpen)}>
+        <ToastContainer/>
         <HiTrash className="mr-2 text-lg" />
         Delete item
       </Button>
@@ -554,7 +716,7 @@ const DeleteProductModal: FC = function () {
               Are you sure you want to delete this product?
             </p>
             <div className="flex items-center gap-x-3">
-              <Button color="failure" onClick={() => setOpen(false)}>
+              <Button color="failure" onClick={deleteProduct}>
                 Yes, I'm sure
               </Button>
               <Button color="gray" onClick={() => setOpen(false)}>
@@ -583,10 +745,13 @@ const ProductsTable: FC = function () {
         setProducts(resp.result)
     }
   }
+  const [page,setpage] = useState(1)
+
   useEffect(()=>{
     getProduct()
   },[])
   return (
+    <>
     <Table className="min-w-full divide-y divide-gray-200 dark:divide-gray-600">
       <Table.Head className="bg-gray-100 dark:bg-gray-700">
         <Table.HeadCell>
@@ -625,7 +790,7 @@ const ProductsTable: FC = function () {
           {e.price}
           </Table.Cell>
           <Table.Cell className="whitespace-nowrap p-4 text-base font-medium text-gray-900 dark:text-white">
-          {e.category.name}
+          {e.category?.name}
           </Table.Cell>
           <Table.Cell className="whitespace-nowrap p-4 text-base font-medium text-gray-900 dark:text-white">
           {e.sub_category.name}
@@ -633,7 +798,7 @@ const ProductsTable: FC = function () {
           <Table.Cell className="space-x-2 whitespace-nowrap p-4">
             <div className="flex items-center gap-x-3">
               <EditProductModal />
-              <DeleteProductModal />
+              <DeleteProductModal  id={e._id} />
             </div>
           </Table.Cell>
          
@@ -641,6 +806,8 @@ const ProductsTable: FC = function () {
       ))}
       </Table.Body>
     </Table>
+    <Pagination page={page} setpage={setpage} total={products != null ? products.length : 10} perpage={10} />
+    </>
   );
 };
 

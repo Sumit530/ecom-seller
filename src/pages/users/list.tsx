@@ -1327,19 +1327,29 @@ const DeleteUserModal: FC = function () {
   );
 };
 
-export const Pagination: FC = function () {
+export const Pagination: FC = function ({page,setpage,total,perpage}) {
   return (
     <div className="sticky right-0 bottom-0 w-full items-center border-t border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-800 sm:flex sm:justify-between">
       <div className="mb-4 flex items-center sm:mb-0">
         <a
-          href="#"
+          onClick={()=>{
+          if(page > 1){
+
+            setpage(page-1)
+          }
+          }}
           className="inline-flex cursor-pointer justify-center rounded p-1 text-gray-500 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
         >
           <span className="sr-only">Previous page</span>
           <HiChevronLeft className="text-2xl" />
         </a>
         <a
-          href="#"
+          onClick={()=>{
+          if(page <= Math.floor(total/perpage)){
+
+            setpage(page+1)
+          }
+          }}
           className="mr-2 inline-flex cursor-pointer justify-center rounded p-1 text-gray-500 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
         >
           <span className="sr-only">Next page</span>
@@ -1348,11 +1358,11 @@ export const Pagination: FC = function () {
         <span className="text-sm font-normal text-gray-500 dark:text-gray-400">
           Showing&nbsp;
           <span className="font-semibold text-gray-900 dark:text-white">
-            1-20
+            {page}-{Math.floor(perpage)}
           </span>
           &nbsp;of&nbsp;
           <span className="font-semibold text-gray-900 dark:text-white">
-            2290
+            {total}
           </span>
         </span>
       </div>

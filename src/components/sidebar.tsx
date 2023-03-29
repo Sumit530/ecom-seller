@@ -69,10 +69,10 @@ const ExampleSidebar: FC = function () {
                 Orders
               </Sidebar.Item>
               <Sidebar.Item
-                href="/users/list"
+                href="/sales/list"
                 icon={HiUsers}
                 className={
-                  "/users/list" === currentPage
+                  "/sales/list" === currentPage
                     ? "bg-gray-100 dark:bg-gray-700"
                     : ""
                 }

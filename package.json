@@ -35,10 +35,11 @@
     "flowbite": "^1.5.5",
     "flowbite-react": "^0.3.7",
     "react-apexcharts": "^1.4.0",
-    "react-icons": "^4.7.1",
+    "react-icons": "^4.8.0",
     "react-select": "^5.7.2",
     "react-timer-hook": "^3.0.5",
-    "react-toastify": "^9.1.2"
+    "react-toastify": "^9.1.2",
+    "tailwind-scrollbar-hide": "^1.1.7"
   },
   "devDependencies": {
     "@types/react": "^18.0.26",
