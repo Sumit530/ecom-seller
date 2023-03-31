@@ -4,13 +4,14 @@ import { createRoot } from "react-dom/client";
 import "./index.css";
 import theme from "./flowbite-theme";
 import { Flowbite } from "flowbite-react";
-import { Routes, Route, useNavigate,Navigate } from "react-router";
+import { Routes, Route, Navigate } from "react-router";
 import { BrowserRouter } from "react-router-dom";
 import DashboardPage from "./pages";
 import SignInPage from "./pages/authentication/sign-in";
 import SignUpPage from "./pages/authentication/sign-up";
 import EcommerceProductsPage from "./pages/e-commerce/products";
 import UserListPage from "./pages/users/list";
+import OrderListPage from "./pages/orders/list";
 
 const container = document.getElementById("root");
 
@@ -40,6 +41,7 @@ root.render(
             element={<EcommerceProductsPage />}
             />
             <Route path="/users/list" element={<UserListPage  />} />
+            <Route path="/order/list" element={<OrderListPage  />} />
             </>
          :   
          <>

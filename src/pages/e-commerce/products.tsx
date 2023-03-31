@@ -13,6 +13,7 @@ import Select from 'react-select'
 import { FC, useEffect } from "react";
 import { useState } from "react";
 import { FaPlus } from "react-icons/fa";
+import { MdDelete } from "react-icons/md";
 import {
   HiCog,
   HiDotsVertical,
@@ -51,7 +52,7 @@ const EcommerceProductsPage: FC = function () {
             </h1>
           </div>
           <div className="block items-center sm:flex">
-            <SearchForProducts />
+            {/* <SearchForProducts />
             <div className="hidden space-x-1 border-l border-gray-100 pl-2 dark:border-gray-700 md:flex">
               <a
                 href="#"
@@ -81,7 +82,7 @@ const EcommerceProductsPage: FC = function () {
                 <span className="sr-only">Settings</span>
                 <HiDotsVertical className="text-2xl" />
               </a>
-            </div>
+            </div> */}
             <div className="flex w-full items-center sm:justify-end">
               <AddProductModal />
             </div>
@@ -135,6 +136,7 @@ const [productImageURL,setproductImageURL] = useState([])
 
 
   })
+  const [specification,setspecification] = useState([{key:"",value:""}])
   const handleinputs = (e)=>{
     setData({...data,[e.target.name]:e.target.value})
   }
@@ -181,7 +183,48 @@ const [productImageURL,setproductImageURL] = useState([])
   
   const addProduct = async(e) =>{
     e.preventDefault()
-    
+    if(data.name.length ==0){
+      toast.error("please give a product nane",{
+        autoClose:800
+      })
+      return
+    }
+    if(data.description.length ==0){
+      toast.error("please give a product nane",{
+        autoClose:800
+      })
+      return
+    }
+    if(data.price.length == 0){
+      toast.error("please give a product nane",{
+        autoClose:800
+      })
+      return
+    }
+    if(data.discounted_price.length ==0){
+      toast.error("please give a product nane",{
+        autoClose:800
+      })
+      return
+    }
+    if(!data.category.value){
+      toast.error("please give a product nane",{
+        autoClose:800
+      })
+      return
+    }
+    if(!data.sub_category.value){
+      toast.error("please give a product nane",{
+        autoClose:800
+      })
+      return
+    }
+    if(specification[0]?.key.length ==0 || specification[0]?.value.length ==0){
+      toast.error("please give a product nane",{
+        autoClose:800
+      })
+      return
+    }
     
     const formdata = new FormData()
     formdata.append("name",data.name)
@@ -191,6 +234,7 @@ const [productImageURL,setproductImageURL] = useState([])
     formdata.append("brand",data.brand)
     formdata.append("category",data.category.value)
     formdata.append("sub_category",data.sub_category.value)
+    formdata.append("specification",JSON.stringify(specification))
     productImageURL.map((e)=>{
       formdata.append("product",e)
     })
@@ -235,7 +279,7 @@ const [productImageURL,setproductImageURL] = useState([])
           <strong>Add Product</strong>
         </Modal.Header>
         <Modal.Body>
-          <form>
+          <form className="h-[35rem] overflow-scroll">
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
               <div>
                 <Label htmlFor="productName">Product name</Label>
@@ -315,6 +359,66 @@ const [productImageURL,setproductImageURL] = useState([])
                   className="mt-1"
                 />
               </div>
+              <div className="col-span-2">
+                <h1>Specification</h1>
+              </div>
+              {
+              specification.map((e,i)=>(
+
+                <>
+              
+                <div>
+                <Label htmlFor="price">key</Label>
+                <TextInput
+                  id="price"
+                  name="price"
+                  onChange = {(event)=>{
+                    let data = [...specification];
+                    data[i].key = event.target.value;
+                    setspecification(data)
+                  }}
+                  value={e.key}
+                  type="text"
+                  placeholder="model "
+                  className="mt-1"
+                  
+                  />
+              </div>
+              <div>
+                <Label htmlFor="Discountprice">value</Label>
+                <span className="grid grid-cols-10">
+
+                <TextInput
+                  id="Discountprice"
+                  name="discounted_price"
+                  onChange = {(event)=>{
+                    let data = [...specification];
+                    data[i].value = event.target.value;
+                    setspecification(data)
+                  }}
+                  value={e.value}
+                  type="text"
+                  placeholder="bajaj fan v45"
+                  className="mt-1 col-span-8"
+                  />
+                  <MdDelete className="text-4xl text-red-700 ml-2 mt-2" onClick={()=>{
+                      const data = [...specification]
+                      data.splice(i,1)
+                      setspecification(data)
+                  }}  />
+                  </span>
+              </div>
+                </>
+                  ))
+                }
+                <div className="col-span-2 ">
+
+                <Button className="float-right" onClick={()=>{
+                  setspecification([...specification,{key:"",value:""}])
+                }}
+                >Add more
+                </Button>
+                </div>
               <div className="lg:col-span-2">
                 <Label htmlFor="productDetails">Product details</Label>
                 <Textarea
@@ -534,7 +638,7 @@ const EditProductModal: FC = function () {
   );
 };
 
-const DeleteProductModal: FC = function () {
+const DeleteProductModal: FC = function ({id}) {
   const [isOpen, setOpen] = useState(false);
 
   return (
@@ -554,7 +658,22 @@ const DeleteProductModal: FC = function () {
               Are you sure you want to delete this product?
             </p>
             <div className="flex items-center gap-x-3">
-              <Button color="failure" onClick={() => setOpen(false)}>
+              <Button color="failure" onClick={async() => {
+                const formdata = new FormData()
+                formdata.append("product_id",id)
+                const fetchdata = await fetch(`${window.path}/deleteproduct`,{
+                  method:"post",
+                  body:formdata,
+                  headers:{
+                    auth:localStorage.getItem("sellerAuth")
+                  }
+                })
+                const resp = await fetchdata.json()
+                if(resp.status == 1){
+                  setOpen(false)
+                  window.location.reload(false)
+                }
+              }}>
                 Yes, I'm sure
               </Button>
               <Button color="gray" onClick={() => setOpen(false)}>
@@ -599,6 +718,7 @@ const ProductsTable: FC = function () {
         <Table.HeadCell>Price</Table.HeadCell>
         <Table.HeadCell>Category</Table.HeadCell>
         <Table.HeadCell>Sub Category</Table.HeadCell>
+        <Table.HeadCell>status</Table.HeadCell>
         <Table.HeadCell>Actions</Table.HeadCell>
       </Table.Head>
       <Table.Body className="divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-gray-800">
@@ -630,10 +750,12 @@ const ProductsTable: FC = function () {
           <Table.Cell className="whitespace-nowrap p-4 text-base font-medium text-gray-900 dark:text-white">
           {e.sub_category.name}
           </Table.Cell>
+          <Table.Cell className="whitespace-nowrap p-4 text-base font-medium text-gray-900 dark:text-white">
+          {e.is_verified == true ? 'success' : 'pending'}
+          </Table.Cell>
           <Table.Cell className="space-x-2 whitespace-nowrap p-4">
             <div className="flex items-center gap-x-3">
-              <EditProductModal />
-              <DeleteProductModal />
+              <DeleteProductModal id={e._id}/>
             </div>
           </Table.Cell>
          

@@ -37,7 +37,7 @@ const ExampleSidebar: FC = function () {
           </form>
           <Sidebar.Items>
             <Sidebar.ItemGroup>
-              <Sidebar.Item
+              {/* <Sidebar.Item
                 href="/"
                 icon={HiChartPie}
                 className={
@@ -45,7 +45,7 @@ const ExampleSidebar: FC = function () {
                 }
               >
                 Dashboard
-              </Sidebar.Item>
+              </Sidebar.Item> */}
               <Sidebar.Item
                 href="/e-commerce/products"
                 icon={HiShoppingBag}
@@ -58,17 +58,17 @@ const ExampleSidebar: FC = function () {
                 Products
               </Sidebar.Item>
               <Sidebar.Item
-                href="/users/list"
+                href="/order/list"
                 icon={HiUsers}
                 className={
-                  "/users/list" === currentPage
+                  "/order/list" === currentPage
                     ? "bg-gray-100 dark:bg-gray-700"
                     : ""
                 }
               >
                 Orders
               </Sidebar.Item>
-              <Sidebar.Item
+              {/* <Sidebar.Item
                 href="/users/list"
                 icon={HiUsers}
                 className={
@@ -79,7 +79,7 @@ const ExampleSidebar: FC = function () {
               >
                 Sales
               </Sidebar.Item>
-             
+              */}
             </Sidebar.ItemGroup>
           </Sidebar.Items>
         </div>
