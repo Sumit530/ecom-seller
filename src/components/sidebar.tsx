@@ -68,13 +68,8 @@ const ExampleSidebar: FC = function () {
               >
                 Orders
               </Sidebar.Item>
-<<<<<<< HEAD
               {/* <Sidebar.Item
                 href="/users/list"
-=======
-              <Sidebar.Item
-                href="/sales/list"
->>>>>>> 2408a3fac5ecd6f345849bb8cdf86a32061b3f2d
                 icon={HiUsers}
                 className={
                   "/sales/list" === currentPage
