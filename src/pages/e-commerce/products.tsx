@@ -98,7 +98,7 @@ const EcommerceProductsPage: FC = function () {
           </div>
         </div>
       </div>
-      <Pagination />
+      
     </NavbarSidebarLayout>
   );
 };
@@ -142,6 +142,8 @@ const [productImageURL,setproductImageURL] = useState([])
   }
   const [category,setcategory] = useState(null)
   const [subcategory,setSubcategory] = useState(category != null && category[0])
+  const [countOfField,setCountOfField] = useState(1)
+  const [specification,setSpecification] = useState([{key:"",value:''}])
   const getCat = async() =>{
     const fetchcat = await fetch(`${window.path}/getcategory`,{
       method:"get",
@@ -183,6 +185,7 @@ const [productImageURL,setproductImageURL] = useState([])
   
   const addProduct = async(e) =>{
     e.preventDefault()
+<<<<<<< HEAD
     if(data.name.length ==0){
       toast.error("please give a product nane",{
         autoClose:800
@@ -226,6 +229,80 @@ const [productImageURL,setproductImageURL] = useState([])
       return
     }
     
+
+    
+    if(data.name.length == 0  ){
+      toast.error("please fill product name Properly",{
+        autoClose:200,
+        progress:false,
+        theme:"light",
+    })
+    return
+    }
+    if(data.description.length == 0  ){
+      toast.error("please fill description Properly",{
+        autoClose:200,
+        progress:false,
+        theme:"light",
+    })
+    return
+    }
+    if(data.price.length == 0 && /^\d+$/.test(data.price) ){
+      toast.error("please fill price Properly",{
+        autoClose:200,
+        progress:false,
+        theme:"light",
+    })
+    return
+    }
+    if(data.discounted_price.length == 0 && /^\d+$/.test(data.discounted_price) ){
+      toast.error("please fill discounted price Properly",{
+        autoClose:200,
+        progress:false,
+        theme:"light",
+    })
+    return
+    }
+    if(data.brand.length == 0  ){
+      toast.error("please fill brand Properly",{
+        autoClose:200,
+        progress:false,
+        theme:"light",
+    })
+    return
+    }
+    if(!data.category?.value ){
+      toast.error("please fill category Properly",{
+        autoClose:200,
+        progress:false,
+        theme:"light",
+    })
+    return
+    }
+    if(!data.sub_category?.value  ){
+      toast.error("please fill sub Category Properly",{
+        autoClose:200,
+        progress:false,
+        theme:"light",
+    })
+    return
+    }
+    const specificationCheck = specification.map((e)=>{
+      if(e.key.length == 0 || e.value.length == 0){
+        return false
+      }
+      else {
+        return true
+      }
+    })
+    if(specificationCheck == false){
+      toast.error("please fill Specification Properly",{
+        autoClose:200,
+        progress:false,
+        theme:"light",
+    })
+    return
+    }
     const formdata = new FormData()
     formdata.append("name",data.name)
     formdata.append("description",data.description)
@@ -265,17 +342,20 @@ const [productImageURL,setproductImageURL] = useState([])
       autoClose:400,
       progress:false
     })
+    window.location.reload(false)
+    
   }
   
   return (
     <>
+
       <Button color="primary" onClick={() => setOpen(!isOpen)}>
         <ToastContainer/>
         <FaPlus className="mr-2 text-lg" />
        Add Product
       </Button>
-      <Modal onClose={() => setOpen(false)} show={isOpen}>
-        <Modal.Header className="border-b border-gray-200 !p-6 dark:border-gray-700">
+      <Modal onClose={() => setOpen(false)} show={isOpen}  className="h-screen" >
+        <Modal.Header className="border-b border-gray-200   !p-6 dark:border-gray-700">
           <strong>Add Product</strong>
         </Modal.Header>
         <Modal.Body>
@@ -324,6 +404,7 @@ const [productImageURL,setproductImageURL] = useState([])
                   />
                 }
               </div>
+              
               <div>
                 <Label htmlFor="brand">Brand</Label>
                 <TextInput
@@ -640,10 +721,32 @@ const EditProductModal: FC = function () {
 
 const DeleteProductModal: FC = function ({id}) {
   const [isOpen, setOpen] = useState(false);
-
+  const deleteProduct = async() =>{
+    console.log("hey")
+    const formdata = new FormData()
+    formdata.append("product_id",id)
+    const fetchdata = await fetch(`${window.path}/deleteproduct`,{
+      headers:{
+        auth:localStorage.getItem("sellerAuth")
+      },  
+      method:"post",
+      body:formdata,
+    })
+    const reps = await fetchdata.json()
+    if(reps.status == 1){
+      toast.success("Product Deleted Successfully",{
+        position:"top-center",
+        autoClose:400,
+        progress:false
+      })
+      window.location.reload(false)
+      setOpen(false)
+    }
+  }
   return (
     <>
       <Button color="failure" onClick={() => setOpen(!isOpen)}>
+        <ToastContainer/>
         <HiTrash className="mr-2 text-lg" />
         Delete item
       </Button>
@@ -674,6 +777,8 @@ const DeleteProductModal: FC = function ({id}) {
                   window.location.reload(false)
                 }
               }}>
+
+              <Button color="failure" onClick={deleteProduct}>
                 Yes, I'm sure
               </Button>
               <Button color="gray" onClick={() => setOpen(false)}>
@@ -702,10 +807,13 @@ const ProductsTable: FC = function () {
         setProducts(resp.result)
     }
   }
+  const [page,setpage] = useState(1)
+
   useEffect(()=>{
     getProduct()
   },[])
   return (
+    <>
     <Table className="min-w-full divide-y divide-gray-200 dark:divide-gray-600">
       <Table.Head className="bg-gray-100 dark:bg-gray-700">
         <Table.HeadCell>
@@ -745,7 +853,7 @@ const ProductsTable: FC = function () {
           {e.price}
           </Table.Cell>
           <Table.Cell className="whitespace-nowrap p-4 text-base font-medium text-gray-900 dark:text-white">
-          {e.category.name}
+          {e.category?.name}
           </Table.Cell>
           <Table.Cell className="whitespace-nowrap p-4 text-base font-medium text-gray-900 dark:text-white">
           {e.sub_category.name}
@@ -756,6 +864,8 @@ const ProductsTable: FC = function () {
           <Table.Cell className="space-x-2 whitespace-nowrap p-4">
             <div className="flex items-center gap-x-3">
               <DeleteProductModal id={e._id}/>
+              <EditProductModal />
+              <DeleteProductModal  id={e._id} />
             </div>
           </Table.Cell>
          
@@ -763,6 +873,8 @@ const ProductsTable: FC = function () {
       ))}
       </Table.Body>
     </Table>
+    <Pagination page={page} setpage={setpage} total={products != null ? products.length : 10} perpage={10} />
+    </>
   );
 };
 
