@@ -38,7 +38,7 @@ const hanldelogin = async() =>{
   console.log(resp)
   if(resp.status == 1){
       localStorage.setItem("sellerAuth",resp.token)
-      navigate("/")
+      navigate("/users/list")
   } 
   else if (resp.status == -1){
     toast.error("Invalid Password or username!",{

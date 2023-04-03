@@ -1,6 +1,7 @@
 import { Sidebar, TextInput } from "flowbite-react";
 import type { FC } from "react";
 import { useEffect, useState } from "react";
+import Logo from "../logo.png"
 import {
   HiChartPie,
   HiClipboard,
