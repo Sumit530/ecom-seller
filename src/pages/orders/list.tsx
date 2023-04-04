@@ -26,6 +26,8 @@ import {
   import NavbarSidebarLayout from "../../layouts/navbar-sidebar";
   
   const UserListPage: FC = function () {
+
+    
     return (
       <NavbarSidebarLayout isFooter={false}>
         <div className="block items-center justify-between border-b border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-800 sm:flex">
@@ -204,6 +206,7 @@ import {
   
   const AllUsersTable: FC = function () {
 const [orders,setorders] =  useState(null)
+const [seller,setSeller] = useState(1)
     const getOrders = async() =>{
         const fetchorder= await fetch(`${window.path}/getorders`,{
                 method:"get",
@@ -214,13 +217,13 @@ const [orders,setorders] =  useState(null)
         const resp = await fetchorder.json()
         if(resp.status == 1){
             setorders(resp.result)
+            setSeller(resp.seller_id)
         }
 
     }
     useEffect(()=>{
         getOrders()
     },[])
-    
  
     return (
       <Table className="min-w-full divide-y divide-gray-200 dark:divide-gray-600">
@@ -244,22 +247,17 @@ const [orders,setorders] =  useState(null)
             
           <Table.Row className="hover:bg-gray-100 dark:hover:bg-gray-700">
             <Table.Cell className="w-4 p-4">
-              <div className="flex items-center">
-                <Checkbox aria-describedby="checkbox-1" id="checkbox-1" />
-                <label htmlFor="checkbox-1" className="sr-only">
-                  checkbox
-                </label>
-              </div>
             </Table.Cell>
             <Table.Cell className="mr-12 flex items-center space-x-6 whitespace-nowrap p-4 lg:mr-0">
-              <img
-                className="h-10 w-10 rounded-full"
-                src="/images/users/neil-sims.png"
-                alt="Neil Sims avatar"
-              />
               <div className="text-sm font-normal text-gray-500 dark:text-gray-400">
                 <div className="text-base font-semibold text-gray-900 dark:text-white">
-                  Neil Sims
+                  {
+                     e.product_data.map((e)=>{
+                      if(e.seller_id == seller){
+                       return e.id.name
+                      } 
+                    })
+                  }
                 </div>
                 <div className="text-sm font-normal text-gray-500 dark:text-gray-400">
                   neil.sims@flowbite.com
