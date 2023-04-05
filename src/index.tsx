@@ -12,6 +12,7 @@ import SignUpPage from "./pages/authentication/sign-up";
 import EcommerceProductsPage from "./pages/e-commerce/products";
 import UserListPage from "./pages/users/list";
 import OrderListPage from "./pages/orders/list";
+import SalesListPage from "./pages/sales/sales";
 
 const container = document.getElementById("root");
 
@@ -40,7 +41,7 @@ root.render(
             path="/e-commerce/products"
             element={<EcommerceProductsPage />}
             />
-            <Route path="/users/list" element={<UserListPage  />} />
+            <Route path="/sales/list" element={<SalesListPage  />} />
             <Route path="/order/list" element={<OrderListPage  />} />
             </>
          :   

@@ -69,8 +69,8 @@ const ExampleSidebar: FC = function () {
               >
                 Orders
               </Sidebar.Item>
-              {/* <Sidebar.Item
-                href="/users/list"
+              <Sidebar.Item
+                href="/sales/list"
                 icon={HiUsers}
                 className={
                   "/sales/list" === currentPage
@@ -80,7 +80,7 @@ const ExampleSidebar: FC = function () {
               >
                 Sales
               </Sidebar.Item>
-              */}
+             
             </Sidebar.ItemGroup>
           </Sidebar.Items>
         </div>

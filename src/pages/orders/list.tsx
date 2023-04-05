@@ -235,8 +235,8 @@ const [seller,setSeller] = useState(1)
             <Checkbox id="select-all" name="select-all" />
           </Table.HeadCell>
           <Table.HeadCell>Name</Table.HeadCell>
-          <Table.HeadCell>Position</Table.HeadCell>
-          <Table.HeadCell>Country</Table.HeadCell>
+          <Table.HeadCell>Order Date</Table.HeadCell>
+          <Table.HeadCell>amount</Table.HeadCell>
           <Table.HeadCell>Status</Table.HeadCell>
           <Table.HeadCell>Actions</Table.HeadCell>
         </Table.Head>
@@ -260,15 +260,29 @@ const [seller,setSeller] = useState(1)
                   }
                 </div>
                 <div className="text-sm font-normal text-gray-500 dark:text-gray-400">
-                  neil.sims@flowbite.com
+                {
+                     e.product_data.map((e)=>{
+                      if(e.seller_id == seller){
+                       return e.id.brand
+                      } 
+                    })
+                  }
                 </div>
               </div>
             </Table.Cell>
             <Table.Cell className="whitespace-nowrap p-4 text-base font-medium text-gray-900 dark:text-white">
-              Front-end developer
+            {
+                     new Date(e.order_date).toLocaleDateString()
+                  }
             </Table.Cell>
             <Table.Cell className="whitespace-nowrap p-4 text-base font-medium text-gray-900 dark:text-white">
-              United States
+            {
+                     e.product_data.map((e)=>{
+                      if(e.seller_id == seller){
+                       return e.id.discounted_price
+                      } 
+                    })
+                  }
             </Table.Cell>
             <Table.Cell className="whitespace-nowrap p-4 text-base font-normal text-gray-900 dark:text-white">
               <div className="flex items-center">
@@ -278,8 +292,8 @@ const [seller,setSeller] = useState(1)
             </Table.Cell>
             <Table.Cell>
               <div className="flex items-center gap-x-3 whitespace-nowrap">
-                <EditUserModal />
-                <DeleteUserModal />
+                <EditUserModal id={e._id} />
+                <DeleteUserModal id={e._id} />
               </div>
             </Table.Cell>
           </Table.Row>
@@ -290,124 +304,52 @@ const [seller,setSeller] = useState(1)
     );
   };
   
-  const EditUserModal: FC = function () {
+  const EditUserModal: FC = function ({id}) {
     const [isOpen, setOpen] = useState(false);
-  
+    const acceptOrder= async() =>{
+      const formdata = new FormData()
+      formdata.append("order_id",id)
+      const fetchreject = await fetch(`${window.path}/acceptorder`,{
+        method:"post",
+        body:formdata,
+        headers:{
+          auth:localStorage.getItem("sellerAuth")
+        }
+      })
+      const resp = await fetchreject.json()
+      console.log(resp);
+    }
     return (
       <>
-        <Button color="primary" onClick={() => setOpen(true)}>
+        <Button color="success" onClick={acceptOrder}>
           <div className="flex items-center gap-x-2">
-            <HiOutlinePencilAlt className="text-lg" />
-            Edit user
+            Accept Order
           </div>
         </Button>
-        <Modal onClose={() => setOpen(false)} show={isOpen}>
-          <Modal.Header className="border-b border-gray-200 !p-6 dark:border-gray-700">
-            <strong>Edit user</strong>
-          </Modal.Header>
-          <Modal.Body>
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-              <div>
-                <Label htmlFor="firstName">First name</Label>
-                <div className="mt-1">
-                  <TextInput
-                    id="firstName"
-                    name="firstName"
-                    placeholder="Bonnie"
-                  />
-                </div>
-              </div>
-              <div>
-                <Label htmlFor="lastName">Last name</Label>
-                <div className="mt-1">
-                  <TextInput id="lastName" name="lastName" placeholder="Green" />
-                </div>
-              </div>
-              <div>
-                <Label htmlFor="email">Email</Label>
-                <div className="mt-1">
-                  <TextInput
-                    id="email"
-                    name="email"
-                    placeholder="example@company.com"
-                    type="email"
-                  />
-                </div>
-              </div>
-              <div>
-                <Label htmlFor="phone">Phone number</Label>
-                <div className="mt-1">
-                  <TextInput
-                    id="phone"
-                    name="phone"
-                    placeholder="e.g., +(12)3456 789"
-                    type="tel"
-                  />
-                </div>
-              </div>
-              <div>
-                <Label htmlFor="department">Department</Label>
-                <div className="mt-1">
-                  <TextInput
-                    id="department"
-                    name="department"
-                    placeholder="Development"
-                  />
-                </div>
-              </div>
-              <div>
-                <Label htmlFor="company">Company</Label>
-                <div className="mt-1">
-                  <TextInput
-                    id="company"
-                    name="company"
-                    placeholder="Somewhere"
-                  />
-                </div>
-              </div>
-              <div>
-                <Label htmlFor="passwordCurrent">Current password</Label>
-                <div className="mt-1">
-                  <TextInput
-                    id="passwordCurrent"
-                    name="passwordCurrent"
-                    placeholder="••••••••"
-                    type="password"
-                  />
-                </div>
-              </div>
-              <div>
-                <Label htmlFor="passwordNew">New password</Label>
-                <div className="mt-1">
-                  <TextInput
-                    id="passwordNew"
-                    name="passwordNew"
-                    placeholder="••••••••"
-                    type="password"
-                  />
-                </div>
-              </div>
-            </div>
-          </Modal.Body>
-          <Modal.Footer>
-            <Button color="primary" onClick={() => setOpen(false)}>
-              Save all
-            </Button>
-          </Modal.Footer>
-        </Modal>
+       
       </>
     );
   };
   
-  const DeleteUserModal: FC = function () {
+  const DeleteUserModal: FC = function ({id}) {
     const [isOpen, setOpen] = useState(false);
-  
+    const rejectOrder= async() =>{
+      const formdata = new FormData()
+      formdata.append("order_id",id)
+      const fetchreject = await fetch(`${window.path}/rejectorder`,{
+        method:"post",
+        body:formdata,
+        headers:{
+          auth:localStorage.getItem("auth")
+        }
+
+      })
+    }
     return (
       <>
         <Button color="failure" onClick={() => setOpen(true)}>
           <div className="flex items-center gap-x-2">
-            <HiTrash className="text-lg" />
-            Delete user
+            Reject Order
           </div>
         </Button>
         <Modal onClose={() => setOpen(false)} show={isOpen} size="md">
